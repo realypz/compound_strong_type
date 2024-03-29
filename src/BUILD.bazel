@@ -1,0 +1,43 @@
+cc_library(
+    name = "signature",
+    srcs = [],
+    hdrs = ["signature.h"],
+    visibility = ["//:__subpackages__"],
+    deps = [
+        "//src/helpers:number_helper",
+    ],
+)
+
+cc_library(
+    name = "single_unit",
+    srcs = [],
+    hdrs = ["single_unit.h"],
+    visibility = ["//:__subpackages__"],
+    deps = [
+        ":signature",
+        "//src/helpers:number_helper",
+        "//src/helpers:typelist",
+    ],
+)
+
+cc_library(
+    name = "compound_unit",
+    srcs = [],
+    hdrs = [
+        "compound_unit.h",
+        "src/compound_unit_impl.h",
+    ],
+    visibility = ["//:__subpackages__"],
+    deps = [
+        ":signature",
+        "//src/helpers:number_helper",
+        "//src/helpers:typelist",
+    ],
+)
+
+cc_library(
+    name = "compound_type_old",
+    srcs = [],
+    hdrs = ["compound_type_old.h"],
+    visibility = ["//:__subpackages__"],
+)

@@ -1,0 +1,4 @@
+bazel-*
+.vscode
+tmp
+MODULE.bazel.lock

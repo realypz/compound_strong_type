@@ -1,0 +1,30 @@
+cc_test(
+    name = "test_helpers",
+    srcs = [
+        "test_number_helper.cpp",
+        "test_typelist.cpp",
+    ],
+    deps = [
+        "//src/helpers:number_helper",
+        "//src/helpers:typelist",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "test_signature",
+    srcs = ["test_signature.cpp"],
+    deps = [
+        "//src:signature",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "test_compound_unit",
+    srcs = ["test_compound_unit.cpp"],
+    deps = [
+        "//src:compound_unit",
+        "@googletest//:gtest_main",
+    ],
+)

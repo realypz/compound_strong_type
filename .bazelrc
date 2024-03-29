@@ -1,0 +1,4 @@
+# Default config, now it will resolve to gcc
+build:default_cpp20 --cxxopt='-std=c++20' -c dbg
+
+build:cpp23 --cxxopt='-std=c++2b' -c dbg

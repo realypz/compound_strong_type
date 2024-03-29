@@ -1,0 +1,17 @@
+cc_library(
+    name = "typelist",
+    srcs = [],
+    hdrs = [
+        "type.h",
+        "typelist.h",
+        "typelist_impl.h",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+cc_library(
+    name = "number_helper",
+    srcs = [],
+    hdrs = ["number_helper.h"],
+    visibility = ["//visibility:public"],
+)
