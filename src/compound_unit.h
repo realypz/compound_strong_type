@@ -45,7 +45,7 @@ class CompoundUnit
 
     /// @brief Construct from another convertable compound unit.
     template <number_helper::SignedNumberConcept _XRep, UnitSignatureConcept... _XSignatures>
-    explicit constexpr CompoundUnit(const CompoundUnit<_XRep, _XSignatures...>& from)
+    constexpr CompoundUnit(const CompoundUnit<_XRep, _XSignatures...>& from)
         : CompoundUnit{compound_unit_cast<CompoundUnit<_Rep, _Signatures...>>(from)}
     {}
 

@@ -3,69 +3,43 @@ bazelisk run --config=default_cpp20 //src/tests:test_compound_unit
 */
 #include <gtest/gtest.h>
 
+#include "compound_unit_examples.h"
 #include "src/compound_unit.h"
 #include "src/signature.h"
-
 #include <ratio>
-
-struct TimeTag
-{
-    static constexpr std::string_view kName{"TimeTag"};
-};
-
-struct LengthTag
-{
-    static constexpr std::string_view kName{"LengthTag"};
-};
 
 namespace compound_unit
 {
-using KmPerHour = CompoundUnit<std::int64_t, UnitSignature<std::ratio<1000, 1>, 1, LengthTag>,
-                               UnitSignature<std::ratio<3600, 1>, -1, TimeTag>>;
-
-using KmPerHour_double = CompoundUnit<double, UnitSignature<std::ratio<1000, 1>, 1, LengthTag>,
-                                      UnitSignature<std::ratio<3600, 1>, -1, TimeTag>>;
-using MeterPerSecond = CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 1>, 1, LengthTag>,
-                                    UnitSignature<std::ratio<1, 1>, -1, TimeTag>>;
-
-using MeterPerSecond_square =
-    CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 1>, 1, LengthTag>,
-                 UnitSignature<std::ratio<1, 1>, -2, TimeTag>>;
-
-using MeterPerSecond_double = CompoundUnit<double, UnitSignature<std::ratio<1, 1>, 1, LengthTag>,
-                                           UnitSignature<std::ratio<1, 1>, -1, TimeTag>>;
-
-using Km = CompoundUnit<std::int64_t, UnitSignature<std::ratio<1000, 1>, 1, LengthTag>>;
-using Km_double = CompoundUnit<double, UnitSignature<std::ratio<1000, 1>, 1, LengthTag>>;
-using Meter = CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 1>, 1, LengthTag>>;
-using Meter_double = CompoundUnit<double, UnitSignature<std::ratio<1, 1>, 1, LengthTag>>;
-using CentiMeter = CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 100>, 1, LengthTag>>;
-using CentiMeter_double = CompoundUnit<double, UnitSignature<std::ratio<1, 100>, 1, LengthTag>>;
-
-using Hour = CompoundUnit<std::int64_t, UnitSignature<std::ratio<3600, 1>, 1, TimeTag>>;
-using Hour_double = CompoundUnit<double, UnitSignature<std::ratio<3600, 1>, 1, TimeTag>>;
-using Minute = CompoundUnit<std::int64_t, UnitSignature<std::ratio<60, 1>, 1, TimeTag>>;
-using Minute_double = CompoundUnit<double, UnitSignature<std::ratio<60, 1>, 1, TimeTag>>;
-using Second = CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 1>, 1, TimeTag>>;
-using Second_double = CompoundUnit<double, UnitSignature<std::ratio<1, 1>, 1, TimeTag>>;
-
-using SquareMeter = CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 1>, 2, LengthTag>>;
-using SquareCentiMeter =
-    CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 100>, 2, LengthTag>>;
-using SquareCentiMeter_double =
-    CompoundUnit<double, UnitSignature<std::ratio<1, 100>, 2, LengthTag>>;
-using SquareMillimeter =
-    CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 1000>, 2, LengthTag>>;
-
-using MeterPerSecondSquare =
-    CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 1>, 1, LengthTag>,
-                 UnitSignature<std::ratio<1, 1>, -2, TimeTag>>;
-
 TEST(compound_unit_member_types, _)
 {
     {
         EXPECT_TRUE((std::same_as<KmPerHour::Rep, std::int64_t>));
         EXPECT_TRUE((std::ratio_equal_v<KmPerHour::Period, std::ratio<1000, 3600>>));
+    }
+}
+
+TEST(constructor, _)
+{
+    { // Construct from count.
+        constexpr KmPerHour v{10};
+        EXPECT_EQ(v.count(), 10);
+    }
+
+    { // Construct from the same CompoundUnit type.
+        constexpr KmPerHour v = KmPerHour{10};
+        EXPECT_EQ(v.count(), 10);
+    }
+
+    { // Construct from the different CompoundUnit type.
+        constexpr KmPerHour v = MeterPerSecond{10};
+        EXPECT_EQ(v.count(), 36);
+    }
+
+    { // Copy assignment operator.
+        constexpr MeterPerSecond v{10};
+        KmPerHour v0{};
+        v0 = v;
+        EXPECT_EQ(v0.count(), 36);
     }
 }
 
@@ -296,66 +270,4 @@ TEST(operator_plus_minus, _)
         EXPECT_TRUE((are_compound_unit_equal_v<ReturnType, SquareMillimeter>));
     }
 }
-
-TEST(compound_expression, _)
-{
-    { // A correct example of compound expression.
-        // A double number determines that the intermediate compuation result will
-        // not become zero.
-        constexpr MeterPerSecond v0{10};
-        constexpr Minute t{1};
-        constexpr MeterPerSecondSquare a{1};
-
-        constexpr auto ret = v0 * t + 0.5 * a * t * t;
-        using RetType = std::remove_cv_t<decltype(ret)>;
-
-        EXPECT_DOUBLE_EQ(ret.count(), 10 * 60.0 + 0.5 * 1 * 60 * 60);
-        EXPECT_TRUE((are_compound_unit_equal_v<RetType, Meter_double>));
-    }
-
-    { // An incorrect example of compound expression.
-        // a / 2 => 0
-        constexpr MeterPerSecond v0{10};
-        constexpr Minute t{1};
-        constexpr MeterPerSecondSquare a{1};
-
-        constexpr auto ret = v0 * t + a / 2 * t * t;
-        using RetType = std::remove_cv_t<decltype(ret)>;
-
-        EXPECT_EQ(ret.count(), 10 * 60 + 0);
-        EXPECT_TRUE((are_compound_unit_equal_v<RetType, Meter>));
-    }
-
-    { // A correct example of compound expression.
-        // a / 2.0 => non zero value
-        constexpr MeterPerSecond v0{10};
-        constexpr Minute t{1};
-        constexpr MeterPerSecondSquare a{1};
-
-        constexpr auto ret = v0 * t + a / 2.0 * t * t;
-        using RetType = std::remove_cv_t<decltype(ret)>;
-
-        EXPECT_EQ(ret.count(), 10 * 60.0 + 1 / 2.0 * 60 * 60);
-        EXPECT_TRUE((are_compound_unit_equal_v<RetType, Meter_double>));
-    }
-
-    {
-        // Compute area with all integers
-        constexpr auto ret = Meter{17} / 2 * Meter{8} + CentiMeter{85} * CentiMeter_double{1.9};
-        using RetType = std::remove_cv_t<decltype(ret)>;
-
-        EXPECT_DOUBLE_EQ(ret.count(), 8 * 8 * 10000.0 + 85 * 1.9);
-        EXPECT_TRUE((are_compound_unit_equal_v<RetType, SquareCentiMeter_double>));
-    }
-
-    {
-        // Compute area with all double
-        constexpr auto ret = Meter{17} / 2.0 * Meter{8} - CentiMeter{85} * CentiMeter_double{1.9};
-        using RetType = std::remove_cv_t<decltype(ret)>;
-
-        EXPECT_DOUBLE_EQ(ret.count(), 8.5 * 8.0 * 10000.0 - 85 * 1.9);
-        EXPECT_TRUE((are_compound_unit_equal_v<RetType, SquareCentiMeter_double>));
-    }
-}
-
 } // namespace compound_unit

@@ -1,7 +1,7 @@
 /*
 bazelisk run --config=default_cpp20 //src/tests:test_helpers
-
 */
+
 #include <gtest/gtest.h>
 
 #include "src/helpers/typelist.h"

@@ -22,7 +22,11 @@ cc_test(
 
 cc_test(
     name = "test_compound_unit",
-    srcs = ["test_compound_unit.cpp"],
+    srcs = [
+        "compound_unit_examples.h",
+        "how_to_use.cpp",
+        "test_compound_unit.cpp",
+    ],
     deps = [
         "//src:compound_unit",
         "@googletest//:gtest_main",
