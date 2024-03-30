@@ -1,4 +1,7 @@
-bazel-*
+bazel-bin
+bazel-out
+bazel-testlogs
+bazel-ypz.compound_strong_type
 .vscode
 tmp
 MODULE.bazel.lock
