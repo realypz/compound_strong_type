@@ -6,28 +6,35 @@
 #include <cstdint>
 #include <optional>
 
+#if __cplusplus >= 202002L
+
 namespace compound_unit
 {
 /// Class template for storing a list of types.
 template <class... TArgs>
 struct TypeList
 {
+    /// Get the size of the type list.
     static constexpr std::size_t size()
     {
         return sizeof...(TArgs);
     };
 
+    /// Check whether the type list is empty.
     static constexpr bool empty()
     {
         return size() == 0;
     }
 
+    /// Get the type at the given index.
     template <std::size_t idx> // NOTE: wait pack indexing in C++26
     using type_at = std::tuple_element_t<idx, std::tuple<TArgs...>>;
 
+    /// Check whether the given type is in the list.
     template <class T>
     static constexpr bool has_type{(std::same_as<T, TArgs> || ...)};
 
+    /// Append one or several types to the end of the list.
     template <class... T>
     using push_back_t = TypeList<TArgs..., T...>;
 };
@@ -38,12 +45,17 @@ concept TypeListConcept = type_helper::is_specialization_v<T, TypeList>;
 
 namespace typelist_helper
 {
+
+// NOTE: gcc does not support wrapping this function as a lambda.
+template <class... AArgs, class... BArgs>
+consteval TypeListConcept auto type_list_cat_impl(TypeList<AArgs...>, TypeList<BArgs...>)
+{
+    return TypeList<AArgs..., BArgs...>{};
+}
+
 /// Concatenate two TypeLists.
 template <TypeListConcept ListA, TypeListConcept ListB>
-using typelist_cat_t =
-    decltype([]<class... AArgs, class... BArgs>(TypeList<AArgs...>, TypeList<BArgs...>) {
-        return TypeList<AArgs..., BArgs...>{};
-    }(ListA{}, ListB{}));
+using typelist_cat_t = decltype(type_list_cat_impl(ListA{}, ListB{}));
 
 ///@{
 template <class TargetType, class TArg, class... Rest>
@@ -56,9 +68,9 @@ consteval std::optional<std::size_t> pos_of_type_impl(const std::size_t idx,
  * std::nullopt. Otherwise, return the position of the first occurance in the
  * list.
  */
-template <TypeListConcept TypeList, class T>
+template <TypeListConcept _TList, class T>
 constexpr std::optional<std::size_t> pos_of_type_v{
-    TypeList::empty() ? std::nullopt : pos_of_type_impl<T>(0U, TypeList{})};
+    _TList::empty() ? std::nullopt : pos_of_type_impl<T>(0U, _TList{})};
 ///@}
 
 ///@{
@@ -66,13 +78,13 @@ template <class... TArgs>
 consteval TypeListConcept auto remove_duplicated_type_impl(TypeList<TArgs...>);
 
 /// Remove duplicated types from the given TypeList.
-template <TypeListConcept TypeList>
-using remove_duplicated_type_t = decltype(remove_duplicated_type_impl(TypeList{}));
+template <TypeListConcept _TList>
+using remove_duplicated_type_t = decltype(remove_duplicated_type_impl(_TList{}));
 ///@}
 
 /// Boolean that denotes whether tuple has each element type unique.
-template <TypeListConcept TypeList>
-constexpr bool is_each_type_unique{TypeList::size() == remove_duplicated_type_t<TypeList>::size()};
+template <TypeListConcept _TList>
+constexpr bool is_each_type_unique{_TList::size() == remove_duplicated_type_t<_TList>::size()};
 
 /// Union type of two TypeLists.
 template <TypeListConcept ListA, TypeListConcept ListB>
@@ -89,7 +101,7 @@ constexpr bool are_typelists_interchangeable_v{[]() -> bool {
 /// Make sepcialization of a struct template with TypeList as template
 /// arguments.
 ///@{
-template <template <typename...> class T, TypeListConcept TypeList>
+template <template <typename...> class T, TypeListConcept _TList>
 struct make_struct;
 
 template <template <typename...> class T, class... Args>
@@ -98,8 +110,8 @@ struct make_struct<T, TypeList<Args...>>
     using type = T<Args...>;
 };
 
-template <template <typename...> class T, TypeListConcept TypeList>
-using make_struct_t = make_struct<T, TypeList>::type;
+template <template <typename...> class T, TypeListConcept _TList>
+using make_struct_t = make_struct<T, _TList>::type;
 ///@}
 
 } // namespace typelist_helper
@@ -107,4 +119,5 @@ using make_struct_t = make_struct<T, TypeList>::type;
 
 #include "typelist_impl.h"
 
+#endif
 #endif // SRC_HELPERS_TYPELIST_H_

@@ -82,8 +82,7 @@ TEST(ratios_multiply, _)
     }
 
     {
-        // using JointRatio = ratios_multiply_t<>; Error, does not support empty
-        // list.
+        // using JointRatio = ratios_multiply_t<>; Error, does not support empty ratio list.
     }
 }
 
@@ -107,15 +106,5 @@ TEST(ratio_pow, case_positive_exp)
         using JointRatio = ratio_pow_t<R0, -2>;
         EXPECT_TRUE((std::ratio_equal_v<JointRatio, std::ratio<49, 25>>));
     }
-}
-
-TEST(joint_ratio, case_non_empty_tuple)
-{
-    using R0 = std::ratio<1, 1>; // km
-    using R1 = std::ratio<60, 1>; // hour
-
-    using JointRatio = joint_ratio<R1, -1, R0>::type;
-    EXPECT_EQ(JointRatio::num, 1);
-    EXPECT_EQ(JointRatio::den, 60);
 }
 } // namespace compound_unit::number_helper

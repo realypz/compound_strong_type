@@ -9,9 +9,23 @@ on:
             - main
 
 jobs:
-    build-and-test:
+    build-and-test-macos-arm64:
         runs-on: macos-14
+        steps:
+          - uses: actions/checkout@v2
+          - uses: bazel-contrib/setup-bazel@0.8.1
+            with:
+                # Avoid downloading Bazel every time.
+                bazelisk-cache: true
+                # Store build cache per workflow.
+                disk-cache: ${{ github.workflow }}
+                # Share repository cache between workflows.
+                repository-cache: true
+          - run: bazelisk build --config=default_cpp20 //...
+          - run: bazelisk test --config=default_cpp20 //...
 
+    build-and-test-ubuntu-x86_64:
+        runs-on: ubuntu-22.04
         steps:
           - uses: actions/checkout@v2
           - uses: bazel-contrib/setup-bazel@0.8.1

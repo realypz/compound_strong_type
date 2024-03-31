@@ -31,7 +31,7 @@ TEST(constructor, _)
     }
 
     { // Construct from the different CompoundUnit type.
-        constexpr KmPerHour v = MeterPerSecond{10};
+        constexpr KmPerHour v = MeterPerSecond_double{10.0};
         EXPECT_EQ(v.count(), 36);
     }
 
@@ -233,7 +233,7 @@ TEST(operator_divide, _)
 
             constexpr MeterPerSecond_double ret_1{distance / time}; // 250 m/min = 25/6 m/s
             EXPECT_DOUBLE_EQ(ret_1.count(), 25.0 / 6.0);
-            EXPECT_TRUE((are_compound_unit_convertable_v<MeterPerSecond_double, ReturnType>));
+            EXPECT_TRUE((are_compound_units_convertable_v<MeterPerSecond_double, ReturnType>));
         }
     }
 }
