@@ -14,9 +14,11 @@ namespace compound_unit
 /**
  * Compound Unit
  * @details A compound unit consists of several one or several unit signatures
- * with their respective exponents.
+ *          with their respective exponents.
  * @tparam _Rep the underlying representation type. Must be a signed number.
  * @tparam _Signatures the unit signatures.
+ * @pre     The number of signatures must be greater than 0.
+ * @pre     The tags of each signature must be unique.
  */
 template <number_helper::SignedNumberConcept _Rep, UnitSignatureConcept... _Signatures>
 requires(sizeof...(_Signatures) > 0 &&
@@ -31,15 +33,15 @@ class CompoundUnit
     using Signatures = TypeList<_Signatures...>;
 
     /// @brief The period of the compound unit.
-    using Period = signature_helper::joint_period_t<_Signatures...>;
+    using Period = number_helper::ratios_multiply_t<
+        typename number_helper::ratio_pow_t<typename _Signatures::Period, _Signatures::Exp>...>;
 
     /// @brief Constructors.
     ///@{
     /// @brief Default constructor.
-    constexpr CompoundUnit() : count_{0} {};
+    explicit constexpr CompoundUnit() : count_{0} {};
 
     /// @brief Construct from count.
-    /// @param count
     explicit constexpr CompoundUnit(const _Rep count) : count_{count}
     {}
 
@@ -65,33 +67,26 @@ class CompoundUnit
 template <class T>
 concept CompoundUnitConcept = type_helper::is_specialization_v<T, CompoundUnit>;
 
-template <number_helper::SignedNumberConcept TRep, UnitSignatureConcept... TSignatures,
-          number_helper::SignedNumberConcept URep, UnitSignatureConcept... USignatures>
-consteval bool are_compound_unit_convertable_impl(CompoundUnit<TRep, TSignatures...>,
-                                                  CompoundUnit<URep, USignatures...>)
-{
-    if constexpr (sizeof...(TSignatures) != sizeof...(USignatures))
-    {
-        return false;
-    }
-
-    using DefaultRatio = std::ratio<1, 1>;
-
-    return typelist_helper::are_typelists_interchangeable_v<
-        TypeList<UnitSignature<DefaultRatio, TSignatures::Exp, typename TSignatures::Tag>...>,
-        TypeList<UnitSignature<DefaultRatio, USignatures::Exp, typename USignatures::Tag>...>>;
-}
-
 /**
  * Helper boolean to determine whether two compound units are convertable or not.
  * @tparam T one compound unit specialization
  * @tparam U another compound unit specialization
- * @details When all of the following conditions are met, T and U are
- * convertable:
- *          * T and U has the same set of signatures.
+ * @details When all of the following conditions are met, T and U are convertable:
+ *              * T and U has the same set of (Tag, Exp) pairs.
  */
 template <CompoundUnitConcept T, CompoundUnitConcept U>
-constexpr bool are_compound_unit_convertable_v{are_compound_unit_convertable_impl(T{}, U{})};
+constexpr bool are_compound_units_convertable_v{[]<number_helper::SignedNumberConcept TRep,
+                                                   UnitSignatureConcept... TSignatures,
+                                                   number_helper::SignedNumberConcept URep,
+                                                   UnitSignatureConcept... USignatures>(
+                                                    CompoundUnit<TRep, TSignatures...>,
+                                                    CompoundUnit<URep, USignatures...>) -> bool {
+    constexpr bool size_equal{sizeof...(TSignatures) == sizeof...(USignatures)};
+    constexpr bool signatures_equal{typelist_helper::are_typelists_interchangeable_v<
+        TypeList<UnitSignature<std::ratio<1, 1>, TSignatures::Exp, typename TSignatures::Tag>...>,
+        TypeList<UnitSignature<std::ratio<1, 1>, USignatures::Exp, typename USignatures::Tag>...>>};
+    return size_equal && signatures_equal;
+}(T{}, U{})};
 
 /**
  * Helper boolean to determine whether two compound units are equal or not.
@@ -99,20 +94,18 @@ constexpr bool are_compound_unit_convertable_v{are_compound_unit_convertable_imp
  * @tparam U another compound unit specialization
  * @details When all of the following conditions are met, T and U are equal:
  *          1. T and U are convertibe with each other.
- *          2. T and U has the same underlying Rep type and T::Period ==
- * U::Period.
+ *          2. T and U has the same underlying Rep type and T::Rep == U::Rep.
+ *          3. T and U has the same period and T::Period == U::Period.
  * @attention Equality of two compound units does NOT require their signatures to
- * be in the same order, or the period of each signature to be the same.
+ *            be in the same order, or the period of each signature to be the same.
+ *            E.g. m/s is equal to mm/ms.
  */
 template <CompoundUnitConcept T, CompoundUnitConcept U>
 constexpr bool are_compound_unit_equal_v{[]() {
-    if constexpr (!(are_compound_unit_convertable_v<T, U> && are_compound_unit_convertable_v<U, T>))
-    {
-        return false;
-    }
-
-    return (std::same_as<typename T::Rep, typename U ::Rep> &&
-            std::ratio_equal_v<typename T::Period, typename U::Period>);
+    constexpr bool is_convertable{are_compound_units_convertable_v<T, U> &&
+                                  are_compound_units_convertable_v<U, T>};
+    constexpr bool is_ratio_equal{std::ratio_equal_v<typename T::Period, typename U::Period>};
+    return is_convertable && std::same_as<typename T::Rep, typename U::Rep> && is_ratio_equal;
 }()};
 
 /**
@@ -126,7 +119,7 @@ constexpr bool are_compound_unit_equal_v{[]() {
  */
 template <CompoundUnitConcept TargetType, number_helper::SignedNumberConcept _FromRep,
           UnitSignatureConcept... _FromSignatures>
-requires(are_compound_unit_convertable_v<TargetType, CompoundUnit<_FromRep, _FromSignatures...>>)
+requires(are_compound_units_convertable_v<TargetType, CompoundUnit<_FromRep, _FromSignatures...>>)
 constexpr TargetType compound_unit_cast(const CompoundUnit<_FromRep, _FromSignatures...>& source)
 {
     using SourceType = CompoundUnit<_FromRep, _FromSignatures...>;
@@ -242,7 +235,7 @@ template <number_helper::SignedNumberConcept _LRep,
 constexpr auto operator/(const CompoundUnit<_LRep, _LSignatures...>& lhs,
                          const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {
-    using RInverseCompoundUnit = CompoundUnit<_RRep, inverse_signature<_RSignatures>...>;
+    using RInverseCompoundUnit = CompoundUnit<_RRep, inverse_signature_t<_RSignatures>...>;
 
     using ReturnType = decltype(impl::determineReturnType(lhs, RInverseCompoundUnit{}));
     using ScalingRatio = decltype(impl::determineScalingRatio(lhs, RInverseCompoundUnit{}));
@@ -286,8 +279,8 @@ template <number_helper::SignedNumberConcept _LRep,
           number_helper::SignedNumberConcept _RRep,
           UnitSignatureConcept... _RSignatures // right
           >
-requires(are_compound_unit_convertable_v<CompoundUnit<_LRep, _LSignatures...>,
-                                         CompoundUnit<_RRep, _RSignatures...>>)
+requires(are_compound_units_convertable_v<CompoundUnit<_LRep, _LSignatures...>,
+                                          CompoundUnit<_RRep, _RSignatures...>>)
 constexpr auto operator+(const CompoundUnit<_LRep, _LSignatures...>& lhs,
                          const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {
@@ -311,8 +304,8 @@ template <number_helper::SignedNumberConcept _LRep,
           number_helper::SignedNumberConcept _RRep,
           UnitSignatureConcept... _RSignatures // right
           >
-requires(are_compound_unit_convertable_v<CompoundUnit<_LRep, _LSignatures...>,
-                                         CompoundUnit<_RRep, _RSignatures...>>)
+requires(are_compound_units_convertable_v<CompoundUnit<_LRep, _LSignatures...>,
+                                          CompoundUnit<_RRep, _RSignatures...>>)
 constexpr auto operator-(const CompoundUnit<_LRep, _LSignatures...>& lhs,
                          const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {

@@ -12,15 +12,6 @@ cc_test(
 )
 
 cc_test(
-    name = "test_signature",
-    srcs = ["test_signature.cpp"],
-    deps = [
-        "//src:signature",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "test_compound_unit",
     srcs = [
         "compound_unit_examples.h",

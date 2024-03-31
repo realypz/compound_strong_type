@@ -35,7 +35,6 @@ constexpr std::int32_t intPow()
     {
         return base * intPow<base, exp - 1>();
     }
-    // return exp == 0 ? 1 : base * intPow<base, exp - 1>();
 }
 
 /// Greatest common denominator of two ratios.
@@ -88,44 +87,6 @@ template <RatioConcept... R>
 using ratios_multiply_t = ratios_multiply<R...>::type;
 
 ///@}
-
-template <RatioConcept Ratio, std::int32_t Exp, RatioConcept InitRatio = std::ratio<1, 1>>
-struct joint_ratio
-{
-  private:
-    struct NumDenPair
-    {
-        std::int32_t num;
-        std::int32_t den;
-    };
-
-    static constexpr NumDenPair impl()
-    {
-        std::int32_t num{InitRatio::num};
-        std::int32_t den{InitRatio::den};
-
-        constexpr std::int32_t exp_abs{Exp >= 0 ? Exp : -Exp};
-        // NOTE: std::abs() can be used as constexpr func since C++23.
-
-        for (std::int32_t loop{}; loop < exp_abs; ++loop)
-        {
-            if constexpr (Exp > 0)
-            {
-                num *= Ratio::num;
-                den *= Ratio::den;
-            }
-            else if (Exp < 0)
-            {
-                num *= Ratio::den;
-                den *= Ratio::num;
-            }
-        }
-        return NumDenPair{num, den};
-    };
-
-  public:
-    using type = std::ratio<impl().num, impl().den>;
-};
 
 } // namespace compound_unit::number_helper
 
