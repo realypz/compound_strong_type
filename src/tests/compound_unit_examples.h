@@ -40,6 +40,8 @@ using Meter = CompoundUnit<std::int64_t, UnitSignature<RatioOne, 1, LengthTag>>;
 using Meter_double = CompoundUnit<double, UnitSignature<RatioOne, 1, LengthTag>>;
 using CentiMeter = CompoundUnit<std::int64_t, UnitSignature<std::centi, 1, LengthTag>>;
 using CentiMeter_double = CompoundUnit<double, UnitSignature<std::centi, 1, LengthTag>>;
+using MilliMeter = CompoundUnit<std::int64_t, UnitSignature<std::milli, 1, LengthTag>>;
+using MilliMeter_double = CompoundUnit<double, UnitSignature<std::milli, 1, LengthTag>>;
 ///@}
 
 /// Time units.
