@@ -6,6 +6,7 @@ bazelisk run --config=default_cpp20 //src/tests:test_compound_unit
 #include "compound_unit_examples.h"
 #include "src/compound_unit.h"
 #include "src/signature.h"
+#include <cmath>
 #include <ratio>
 
 namespace compound_unit
@@ -34,6 +35,11 @@ TEST(constructor, _)
         constexpr KmPerHour v = MeterPerSecond_double{10.0};
         EXPECT_EQ(v.count(), 36);
     }
+}
+
+TEST(special_member_functions, _)
+{
+    EXPECT_TRUE((std::is_trivially_copy_assignable_v<KmPerHour>));
 
     { // Copy assignment operator.
         constexpr MeterPerSecond v{10};
@@ -43,7 +49,16 @@ TEST(constructor, _)
     }
 }
 
-TEST(temp, extract_common_signature)
+TEST(comparison_operator, _)
+{
+    EXPECT_EQ((KmPerHour{36} <=> MeterPerSecond{10}), std::partial_ordering::equivalent);
+    EXPECT_EQ((KmPerHour_double{36.0} <=> MeterPerSecond{10}), std::partial_ordering::equivalent);
+    EXPECT_EQ((KmPerHour_double{36.0} <=> KmPerHour_double{NAN}), std::partial_ordering::unordered);
+    EXPECT_EQ((KmPerHour_double{36.001} <=> MeterPerSecond{10}), std::partial_ordering::greater);
+    EXPECT_EQ((KmPerHour_double{35.999} <=> MeterPerSecond{10}), std::partial_ordering::less);
+}
+
+TEST(impl_details, extract_common_signature)
 {
     using LSignaturesTuple = KmPerHour::Signatures;
     using RSignaturesTuple = Second::Signatures;
@@ -233,7 +248,7 @@ TEST(operator_divide, _)
 
             constexpr MeterPerSecond_double ret_1{distance / time}; // 250 m/min = 25/6 m/s
             EXPECT_DOUBLE_EQ(ret_1.count(), 25.0 / 6.0);
-            EXPECT_TRUE((are_compound_units_convertable_v<MeterPerSecond_double, ReturnType>));
+            EXPECT_TRUE((are_compound_units_castable_v<MeterPerSecond_double, ReturnType>));
         }
     }
 }

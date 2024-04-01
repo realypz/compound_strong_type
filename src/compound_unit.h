@@ -1,6 +1,7 @@
 #ifndef SRC_COMPOUND_UNIT_H_
 #define SRC_COMPOUND_UNIT_H_
 
+#include <compare>
 #include <cstdint>
 #include <ratio>
 
@@ -45,13 +46,16 @@ class CompoundUnit
     explicit constexpr CompoundUnit(const _Rep count) : count_{count}
     {}
 
-    /// @brief Construct from another convertable compound unit.
+    /// @brief Construct from another castable compound unit.
     template <number_helper::SignedNumberConcept _XRep, UnitSignatureConcept... _XSignatures>
     constexpr CompoundUnit(const CompoundUnit<_XRep, _XSignatures...>& from)
         : CompoundUnit{compound_unit_cast<CompoundUnit<_Rep, _Signatures...>>(from)}
     {}
 
     ///@}
+
+    /// @brief Operator<=>
+    constexpr std::partial_ordering operator<=>(const CompoundUnit&) const = default;
 
     /// @brief Get the count of the underlying data.
     constexpr _Rep count() const
@@ -68,19 +72,19 @@ template <class T>
 concept CompoundUnitConcept = type_helper::is_specialization_v<T, CompoundUnit>;
 
 /**
- * Helper boolean to determine whether two compound units are convertable or not.
+ * Helper boolean to determine whether two compound units are castable or not.
  * @tparam T one compound unit specialization
  * @tparam U another compound unit specialization
- * @details When all of the following conditions are met, T and U are convertable:
+ * @details When all of the following conditions are met, T and U are castable:
  *              * T and U has the same set of (Tag, Exp) pairs.
  */
 template <CompoundUnitConcept T, CompoundUnitConcept U>
-constexpr bool are_compound_units_convertable_v{[]<number_helper::SignedNumberConcept TRep,
-                                                   UnitSignatureConcept... TSignatures,
-                                                   number_helper::SignedNumberConcept URep,
-                                                   UnitSignatureConcept... USignatures>(
-                                                    CompoundUnit<TRep, TSignatures...>,
-                                                    CompoundUnit<URep, USignatures...>) -> bool {
+constexpr bool are_compound_units_castable_v{[]<number_helper::SignedNumberConcept TRep,
+                                                UnitSignatureConcept... TSignatures,
+                                                number_helper::SignedNumberConcept URep,
+                                                UnitSignatureConcept... USignatures>(
+                                                 CompoundUnit<TRep, TSignatures...>,
+                                                 CompoundUnit<URep, USignatures...>) -> bool {
     constexpr bool size_equal{sizeof...(TSignatures) == sizeof...(USignatures)};
     constexpr bool signatures_equal{typelist_helper::are_typelists_interchangeable_v<
         TypeList<UnitSignature<std::ratio<1, 1>, TSignatures::Exp, typename TSignatures::Tag>...>,
@@ -102,10 +106,10 @@ constexpr bool are_compound_units_convertable_v{[]<number_helper::SignedNumberCo
  */
 template <CompoundUnitConcept T, CompoundUnitConcept U>
 constexpr bool are_compound_unit_equal_v{[]() {
-    constexpr bool is_convertable{are_compound_units_convertable_v<T, U> &&
-                                  are_compound_units_convertable_v<U, T>};
+    constexpr bool is_castable{are_compound_units_castable_v<T, U> &&
+                               are_compound_units_castable_v<U, T>};
     constexpr bool is_ratio_equal{std::ratio_equal_v<typename T::Period, typename U::Period>};
-    return is_convertable && std::same_as<typename T::Rep, typename U::Rep> && is_ratio_equal;
+    return is_castable && std::same_as<typename T::Rep, typename U::Rep> && is_ratio_equal;
 }()};
 
 /**
@@ -119,7 +123,7 @@ constexpr bool are_compound_unit_equal_v{[]() {
  */
 template <CompoundUnitConcept TargetType, number_helper::SignedNumberConcept _FromRep,
           UnitSignatureConcept... _FromSignatures>
-requires(are_compound_units_convertable_v<TargetType, CompoundUnit<_FromRep, _FromSignatures...>>)
+requires(are_compound_units_castable_v<TargetType, CompoundUnit<_FromRep, _FromSignatures...>>)
 constexpr TargetType compound_unit_cast(const CompoundUnit<_FromRep, _FromSignatures...>& source)
 {
     using SourceType = CompoundUnit<_FromRep, _FromSignatures...>;
@@ -140,8 +144,12 @@ template <number_helper::SignedNumberConcept _LRep,
           number_helper::SignedNumberConcept _RRep,
           UnitSignatureConcept... _RSignatures // right
           >
-consteval auto determineReturnType(CompoundUnit<_LRep, _LSignatures...> lhs,
-                                   CompoundUnit<_RRep, _RSignatures...> rhs);
+consteval auto determineMultiplyReturnType(CompoundUnit<_LRep, _LSignatures...> lhs,
+                                           CompoundUnit<_RRep, _RSignatures...> rhs);
+
+template <CompoundUnitConcept LeftType, CompoundUnitConcept RightType>
+consteval CompoundUnitConcept auto determineAdditionReturnType(const LeftType& lhs,
+                                                               const RightType& rhs);
 
 template <number_helper::SignedNumberConcept _LRep,
           UnitSignatureConcept... _LSignatures, // left
@@ -151,14 +159,6 @@ template <number_helper::SignedNumberConcept _LRep,
 consteval auto determineScalingRatio(CompoundUnit<_LRep, _LSignatures...> lhs,
                                      CompoundUnit<_RRep, _RSignatures...> rhs);
 
-template <number_helper::SignedNumberConcept _Rep, class T>
-struct make_compound_unit;
-
-template <number_helper::SignedNumberConcept _Rep, UnitSignatureConcept... _Signatures>
-struct make_compound_unit<_Rep, TypeList<_Signatures...>>
-{
-    using type = CompoundUnit<_Rep, _Signatures...>;
-};
 } // namespace impl
 
 /// Operator* overloads for CompoundUnit.
@@ -178,7 +178,7 @@ template <number_helper::SignedNumberConcept _LRep,
 constexpr auto operator*(const CompoundUnit<_LRep, _LSignatures...>& lhs,
                          const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {
-    using ReturnType = decltype(impl::determineReturnType(lhs, rhs));
+    using ReturnType = decltype(impl::determineMultiplyReturnType(lhs, rhs));
     using ScalingRatio = decltype(impl::determineScalingRatio(lhs, rhs));
 
     if constexpr (CompoundUnitConcept<ReturnType>)
@@ -237,7 +237,7 @@ constexpr auto operator/(const CompoundUnit<_LRep, _LSignatures...>& lhs,
 {
     using RInverseCompoundUnit = CompoundUnit<_RRep, inverse_signature_t<_RSignatures>...>;
 
-    using ReturnType = decltype(impl::determineReturnType(lhs, RInverseCompoundUnit{}));
+    using ReturnType = decltype(impl::determineMultiplyReturnType(lhs, RInverseCompoundUnit{}));
     using ScalingRatio = decltype(impl::determineScalingRatio(lhs, RInverseCompoundUnit{}));
 
     if constexpr (CompoundUnitConcept<ReturnType>)
@@ -279,20 +279,12 @@ template <number_helper::SignedNumberConcept _LRep,
           number_helper::SignedNumberConcept _RRep,
           UnitSignatureConcept... _RSignatures // right
           >
-requires(are_compound_units_convertable_v<CompoundUnit<_LRep, _LSignatures...>,
-                                          CompoundUnit<_RRep, _RSignatures...>>)
+requires(are_compound_units_castable_v<CompoundUnit<_LRep, _LSignatures...>,
+                                       CompoundUnit<_RRep, _RSignatures...>>)
 constexpr auto operator+(const CompoundUnit<_LRep, _LSignatures...>& lhs,
                          const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {
-    using LeftType = CompoundUnit<_LRep, _LSignatures...>;
-    using RightType = CompoundUnit<_RRep, _RSignatures...>;
-
-    using CommonSignatures = std::conditional_t<
-        std::ratio_less_equal_v<typename LeftType::Period, typename RightType::Period>,
-        typename LeftType::Signatures, typename RightType::Signatures>;
-
-    using CommonRep = std::common_type_t<_LRep, _RRep>;
-    using ReturnType = impl::make_compound_unit<CommonRep, CommonSignatures>::type;
+    using ReturnType = decltype(impl::determineAdditionReturnType(lhs, rhs));
 
     return ReturnType{compound_unit_cast<ReturnType>(lhs).count() +
                       compound_unit_cast<ReturnType>(rhs).count()};
@@ -304,12 +296,29 @@ template <number_helper::SignedNumberConcept _LRep,
           number_helper::SignedNumberConcept _RRep,
           UnitSignatureConcept... _RSignatures // right
           >
-requires(are_compound_units_convertable_v<CompoundUnit<_LRep, _LSignatures...>,
-                                          CompoundUnit<_RRep, _RSignatures...>>)
+requires(are_compound_units_castable_v<CompoundUnit<_LRep, _LSignatures...>,
+                                       CompoundUnit<_RRep, _RSignatures...>>)
 constexpr auto operator-(const CompoundUnit<_LRep, _LSignatures...>& lhs,
                          const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {
     return lhs + (-rhs);
+}
+
+/**
+ * Operator<=> overloads for CompoundUnit.
+ * @pre The two operands must be castable with each other.
+ * @details Given possibility of NAN in the computation result, the return type is
+ *          std::partial_ordering.
+ */
+template <CompoundUnitConcept LeftType, CompoundUnitConcept RightType>
+requires(are_compound_units_castable_v<LeftType, RightType>)
+constexpr std::partial_ordering operator<=>(const LeftType& lhs, const RightType& rhs)
+{
+
+    using CommonType = decltype(impl::determineAdditionReturnType(lhs, rhs));
+    static_assert(CompoundUnitConcept<CommonType>,
+                  "The return type of the comparison must be a compound unit.");
+    return compound_unit_cast<CommonType>(lhs) <=> compound_unit_cast<CommonType>(rhs);
 }
 
 } // namespace compound_unit

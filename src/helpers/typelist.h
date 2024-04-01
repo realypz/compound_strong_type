@@ -37,6 +37,10 @@ struct TypeList
     /// Append one or several types to the end of the list.
     template <class... T>
     using push_back_t = TypeList<TArgs..., T...>;
+
+    /// Prepend one or several types to the beginning of the list.
+    template <class... T>
+    using push_front_t = TypeList<T..., TArgs...>;
 };
 
 /// Concept for TypeList.
@@ -102,16 +106,16 @@ constexpr bool are_typelists_interchangeable_v{[]() -> bool {
 /// arguments.
 ///@{
 template <template <typename...> class T, TypeListConcept _TList>
-struct make_struct;
+struct make_specialization;
 
 template <template <typename...> class T, class... Args>
-struct make_struct<T, TypeList<Args...>>
+struct make_specialization<T, TypeList<Args...>>
 {
     using type = T<Args...>;
 };
 
 template <template <typename...> class T, TypeListConcept _TList>
-using make_struct_t = make_struct<T, _TList>::type;
+using make_specialization_t = make_specialization<T, _TList>::type;
 ///@}
 
 } // namespace typelist_helper

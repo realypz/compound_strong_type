@@ -2,6 +2,7 @@
 #define SRC_SRC_COMPOUND_UNIT_IMPL_H_
 
 #include "src/compound_unit.h"
+#include "src/helpers/typelist.h"
 
 namespace compound_unit::impl
 {
@@ -64,8 +65,9 @@ consteval _UnitSignature extractCommonSignature(XTag, TypeList<LSignatures...>,
 }
 
 template <class XTag, UnitSignatureConcept... LSignatures, UnitSignatureConcept... RSignatures>
-consteval auto extractScalingRatioByTag_impl(XTag, TypeList<LSignatures...>,
-                                             TypeList<RSignatures...>)
+consteval number_helper::RatioConcept auto extractScalingRatioByTag_impl(XTag,
+                                                                         TypeList<LSignatures...>,
+                                                                         TypeList<RSignatures...>)
 {
     constexpr std::optional<_UnitSignature> lhs_signature{
         extractSignatureByTag(XTag{}, TypeList<LSignatures...>{})};
@@ -123,9 +125,10 @@ consteval auto removeCancelledOutSignatures(TypeList<Signatures...> input)
     return remove_cancelled_out_signatures_impl<TypeList<>, Signatures...>();
 }
 
+// Returns a TypeList of UnitSignatures (can be empty).
 template <UnitSignatureConcept... _LSignatures, UnitSignatureConcept... _RSignatures>
-consteval auto computeReturnSignatures_impl(TypeList<_LSignatures...> l_sig_tuple,
-                                            TypeList<_RSignatures...> r_sig_tuple)
+consteval TypeListConcept auto computeMultiplicationSignatures_impl(
+    TypeList<_LSignatures...> l_sig_tuple, TypeList<_RSignatures...> r_sig_tuple)
 {
     using LTagsList = TypeList<typename _LSignatures::Tag...>;
     using RTagsList = TypeList<typename _RSignatures::Tag...>;
@@ -154,6 +157,7 @@ consteval auto computeReturnSignatures_impl(TypeList<_LSignatures...> l_sig_tupl
             }
         };
 
+        // TypeList of UnitSignatures or CancelledOutSignatures.
         using CombinedSignatures = TypeList<decltype(_extract_unit_signature(
             typename TagsList::template type_at<Is>{}))...>;
 
@@ -170,19 +174,20 @@ template <number_helper::SignedNumberConcept _LRep,
           number_helper::SignedNumberConcept _RRep,
           UnitSignatureConcept... _RSignatures // right
           >
-consteval auto determineReturnType(CompoundUnit<_LRep, _LSignatures...> lhs,
-                                   CompoundUnit<_RRep, _RSignatures...> rhs)
+consteval auto determineMultiplyReturnType(CompoundUnit<_LRep, _LSignatures...> lhs,
+                                           CompoundUnit<_RRep, _RSignatures...> rhs)
 {
     using CommonRep = std::common_type_t<_LRep, _RRep>;
     using LSignaturesList = TypeList<_LSignatures...>;
     using RSignaturesList = TypeList<_RSignatures...>;
 
     using SignaturesList =
-        decltype(impl::computeReturnSignatures_impl(LSignaturesList{}, RSignaturesList{}));
+        decltype(impl::computeMultiplicationSignatures_impl(LSignaturesList{}, RSignaturesList{}));
 
     if constexpr (SignaturesList::size() > 0)
     {
-        using ReturnType = make_compound_unit<CommonRep, SignaturesList>::type;
+        using ReturnType = typelist_helper::make_specialization_t<
+            CompoundUnit, typename SignaturesList::template push_front_t<CommonRep>>;
         return ReturnType{};
     }
     else
@@ -208,7 +213,8 @@ consteval auto determineScalingRatio(CompoundUnit<_LRep, _LSignatures...> lhs,
     // Common tags of two compound units, the duplication has been removed.
     using TagsList = typelist_helper::typelist_union_t<LTagsList, RTagsList>;
 
-    constexpr auto compute_scaling_ratio = []<class... Tags>(TypeList<Tags...>) -> auto {
+    constexpr auto compute_scaling_ratio =
+        []<class... Tags>(TypeList<Tags...>) -> number_helper::RatioConcept auto {
         using ScalingRatio =
             number_helper::ratios_multiply_t<decltype(impl::extractScalingRatioByTag_impl(
                 Tags{}, LSignaturesList{}, RSignaturesList{}))...>;
@@ -216,6 +222,21 @@ consteval auto determineScalingRatio(CompoundUnit<_LRep, _LSignatures...> lhs,
     };
 
     return decltype(compute_scaling_ratio(TagsList{})){};
+}
+
+template <CompoundUnitConcept LeftType, CompoundUnitConcept RightType>
+consteval CompoundUnitConcept auto determineAdditionReturnType(const LeftType& lhs,
+                                                               const RightType& rhs)
+{
+    using CommonSignatures = std::conditional_t<
+        std::ratio_less_equal_v<typename LeftType::Period, typename RightType::Period>,
+        typename LeftType::Signatures, typename RightType::Signatures>;
+
+    using CommonRep = std::common_type_t<typename LeftType::Rep, typename RightType::Rep>;
+    using ReturnType = typelist_helper::make_specialization_t<
+        CompoundUnit, typename CommonSignatures::template push_front_t<CommonRep>>;
+
+    return ReturnType{};
 }
 
 } // namespace compound_unit::impl

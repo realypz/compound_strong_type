@@ -1,5 +1,5 @@
 # Compound Unit
-This repo implements **strong type** for **compound units**, and its numerical calculation (operator `+` `-` `*` `/`).
+This C++ library implements **strong type** for **compound units**, with its numerical calculation (operator `+` `-` `*` `/`) and numerical comparison operator (`<=>`).
 
 The examples of compound units: `Km/h`, `m/s^2`, `cm^2`.
 
@@ -12,11 +12,15 @@ A UnitSignature is determined by:
 * Exp: The exponent of the unit. E.g. in `m/s^2`, the exp of `meter` is 1, and the exp of `second` is -2.
 * Tag: The tag type of a physical unit (or dimension). E.g. The time signatures (second, millisecond, second^-2 etc.) share the same tag representing "Time". The length signatures (meter, centimeter^2, etc.) share the same tag representing "Length".
 
-The examples of supported operations by this library:
-* 5(Km) * 2 => 10(Km)
-* 10(cm) * 1(m) => 1000(cm^2)
-* 5(Km) / 500(m) => 10
-* 0.5 * 10(m/s^2) * (2s)^2 => 20.0(m)
+The examples of supported operations:
+* `5(Km) * 2` => `10(Km)`
+* `10(cm) * 1(m)` => `1000(cm^2)`
+* `5(Km) / 500(m)` => `10`
+* `0.5 * 10(m/s^2) * (2s)^2` => `20.0(m)`
+
+The examples of supported numercial comparison:
+* `36(Km/h) <=> 10(m/s)` => `std::partial_ordering::equivalent`
+* `36.01(Km/h) <=> 10(m/s)` => `std::partial_ordering::greater`
 
 ## Where can I see the examples?
 * The example compound units are defined in [`src/tests/compound_unit_examples.h`](https://github.com/realypz/ypz.compound_strong_type/blob/master/src/tests/compound_unit_examples.h).
