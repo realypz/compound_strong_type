@@ -6,8 +6,6 @@
 #include <cstdint>
 #include <optional>
 
-#if __cplusplus >= 202002L
-
 namespace compound_unit
 {
 /// Class template for storing a list of types.
@@ -123,5 +121,4 @@ using make_specialization_t = make_specialization<T, _TList>::type;
 
 #include "typelist_impl.h"
 
-#endif
 #endif // SRC_HELPERS_TYPELIST_H_
