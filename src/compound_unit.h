@@ -139,23 +139,17 @@ constexpr TargetType compound_unit_cast(const CompoundUnit<_FromRep, _FromSignat
 
 namespace impl
 {
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _RRep,
-          UnitSignatureConcept... _RSignatures // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _RRep, UnitSignatureConcept... _RSignatures>
 consteval auto determineMultiplyReturnType(CompoundUnit<_LRep, _LSignatures...> lhs,
                                            CompoundUnit<_RRep, _RSignatures...> rhs);
 
 template <CompoundUnitConcept LeftType, CompoundUnitConcept RightType>
-consteval CompoundUnitConcept auto determineAdditionReturnType(const LeftType& lhs,
+consteval CompoundUnitConcept auto determineCommonCompoundUnit(const LeftType& lhs,
                                                                const RightType& rhs);
 
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _RRep,
-          UnitSignatureConcept... _RSignatures // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _RRep, UnitSignatureConcept... _RSignatures>
 consteval auto determineScalingRatio(CompoundUnit<_LRep, _LSignatures...> lhs,
                                      CompoundUnit<_RRep, _RSignatures...> rhs);
 
@@ -170,11 +164,8 @@ consteval auto determineScalingRatio(CompoundUnit<_LRep, _LSignatures...> lhs,
  * @return the result of the multiplication. Can be a compound unit or a number.
  *         The underlying Rep is the common Rep of lhs and rhs.
  */
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _RRep,
-          UnitSignatureConcept... _RSignatures // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _RRep, UnitSignatureConcept... _RSignatures>
 constexpr auto operator*(const CompoundUnit<_LRep, _LSignatures...>& lhs,
                          const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {
@@ -196,10 +187,8 @@ constexpr auto operator*(const CompoundUnit<_LRep, _LSignatures...>& lhs,
 }
 
 /// Multiply a compound unit with a number.
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _Rhs // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _Rhs>
 constexpr auto operator*(const CompoundUnit<_LRep, _LSignatures...>& lhs, const _Rhs rhs)
 {
     using CommonRep = std::common_type_t<_LRep, _Rhs>;
@@ -208,8 +197,7 @@ constexpr auto operator*(const CompoundUnit<_LRep, _LSignatures...>& lhs, const 
 }
 
 /// Multiply a number with a compound unit.
-template <number_helper::SignedNumberConcept _Lhs, // left
-          number_helper::SignedNumberConcept _RRep, // right
+template <number_helper::SignedNumberConcept _Lhs, number_helper::SignedNumberConcept _RRep,
           UnitSignatureConcept... _RSignatures>
 constexpr auto operator*(const _Lhs lhs, const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {
@@ -227,11 +215,8 @@ constexpr auto operator*(const _Lhs lhs, const CompoundUnit<_RRep, _RSignatures.
  * @return the result of the division. Can be a compound unit or a number.
  *         The underlying Rep is the common Rep of lhs and rhs.
  */
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _RRep,
-          UnitSignatureConcept... _RSignatures // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _RRep, UnitSignatureConcept... _RSignatures>
 constexpr auto operator/(const CompoundUnit<_LRep, _LSignatures...>& lhs,
                          const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {
@@ -253,10 +238,8 @@ constexpr auto operator/(const CompoundUnit<_LRep, _LSignatures...>& lhs,
 }
 
 /// Divide a compound unit by a number.
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _Rhs // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _Rhs>
 constexpr auto operator/(const CompoundUnit<_LRep, _LSignatures...>& lhs, const _Rhs rhs)
 {
     using CommonRep = std::common_type_t<_LRep, _Rhs>;
@@ -274,28 +257,22 @@ constexpr auto operator-(const CompoundUnit<_Rep, _Signatures...>& operand)
 }
 
 /// Operator+ overloads for CompoundUnit.
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _RRep,
-          UnitSignatureConcept... _RSignatures // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _RRep, UnitSignatureConcept... _RSignatures>
 requires(are_compound_units_castable_v<CompoundUnit<_LRep, _LSignatures...>,
                                        CompoundUnit<_RRep, _RSignatures...>>)
 constexpr auto operator+(const CompoundUnit<_LRep, _LSignatures...>& lhs,
                          const CompoundUnit<_RRep, _RSignatures...>& rhs)
 {
-    using ReturnType = decltype(impl::determineAdditionReturnType(lhs, rhs));
+    using ReturnType = decltype(impl::determineCommonCompoundUnit(lhs, rhs));
 
     return ReturnType{compound_unit_cast<ReturnType>(lhs).count() +
                       compound_unit_cast<ReturnType>(rhs).count()};
 }
 
 /// Operator- overloads for CompoundUnit.
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _RRep,
-          UnitSignatureConcept... _RSignatures // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _RRep, UnitSignatureConcept... _RSignatures>
 requires(are_compound_units_castable_v<CompoundUnit<_LRep, _LSignatures...>,
                                        CompoundUnit<_RRep, _RSignatures...>>)
 constexpr auto operator-(const CompoundUnit<_LRep, _LSignatures...>& lhs,
@@ -315,7 +292,7 @@ requires(are_compound_units_castable_v<LeftType, RightType>)
 constexpr std::partial_ordering operator<=>(const LeftType& lhs, const RightType& rhs)
 {
 
-    using CommonType = decltype(impl::determineAdditionReturnType(lhs, rhs));
+    using CommonType = decltype(impl::determineCommonCompoundUnit(lhs, rhs));
     static_assert(CompoundUnitConcept<CommonType>,
                   "The return type of the comparison must be a compound unit.");
     return compound_unit_cast<CommonType>(lhs) <=> compound_unit_cast<CommonType>(rhs);

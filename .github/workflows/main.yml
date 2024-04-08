@@ -9,7 +9,7 @@ on:
             - main
 
 jobs:
-    build-and-test-macos-arm64:
+    build-and-test-macos-clang-arm64:
         runs-on: macos-14
         steps:
           - uses: actions/checkout@v2
@@ -24,7 +24,7 @@ jobs:
           - run: bazelisk build --config=default_cpp20 //...
           - run: bazelisk test --config=default_cpp20 //...
 
-    build-and-test-ubuntu-x86_64:
+    build-and-test-ubuntu-gcc-x86_64:
         runs-on: ubuntu-22.04
         steps:
           - uses: actions/checkout@v2

@@ -6,15 +6,11 @@
 
 namespace compound_unit::impl
 {
-struct _UnitSignature
-{
-    std::int32_t num;
-    std::int32_t den;
-    std::int32_t exp;
-};
+struct NullSignature
+{};
 
 template <class XTag, UnitSignatureConcept... Signatures>
-consteval std::optional<_UnitSignature> extractSignatureByTag(XTag, TypeList<Signatures...>)
+consteval auto extractSignatureFromList(XTag, TypeList<Signatures...>)
 {
     using SignaturesList = TypeList<Signatures...>;
     using TagsList = TypeList<typename Signatures::Tag...>;
@@ -22,84 +18,80 @@ consteval std::optional<_UnitSignature> extractSignatureByTag(XTag, TypeList<Sig
     if constexpr (TagsList::template has_type<XTag>)
     {
         constexpr std::size_t pos{*typelist_helper::pos_of_type_v<TagsList, XTag>};
-        constexpr std::int32_t exp{SignaturesList::template type_at<pos>::Exp};
-        constexpr std::int32_t num{SignaturesList::template type_at<pos>::Period::num};
-        constexpr std::int32_t den{SignaturesList::template type_at<pos>::Period::den};
-
-        return _UnitSignature{.num = num, .den = den, .exp = exp};
-    }
-    return std::nullopt;
-}
-
-template <class XTag, UnitSignatureConcept... LSignatures, UnitSignatureConcept... RSignatures>
-consteval _UnitSignature extractCommonSignature(XTag, TypeList<LSignatures...>,
-                                                TypeList<RSignatures...>)
-{
-    constexpr std::optional<_UnitSignature> lhs_signature{
-        extractSignatureByTag(XTag{}, TypeList<LSignatures...>{})};
-    constexpr std::optional<_UnitSignature> rhs_signature{
-        extractSignatureByTag(XTag{}, TypeList<RSignatures...>{})};
-
-    if constexpr (lhs_signature.has_value() && rhs_signature.has_value())
-    {
-        using LeftRatio = std::ratio<lhs_signature->num, lhs_signature->den>;
-        using RightRatio = std::ratio<rhs_signature->num, rhs_signature->den>;
-        using CommonRatio = number_helper::ratio_gcd<RightRatio, LeftRatio>::type;
-        constexpr _UnitSignature common_signature{CommonRatio::num, CommonRatio::den,
-                                                  lhs_signature->exp + rhs_signature->exp};
-
-        return common_signature;
-    }
-    else if (lhs_signature.has_value() && !rhs_signature.has_value())
-    {
-        return *lhs_signature;
-    }
-    else if (!lhs_signature.has_value() && rhs_signature.has_value())
-    {
-        return *rhs_signature;
+        using RetType = SignaturesList::template type_at<pos>;
+        return RetType{};
     }
     else
     {
-        return _UnitSignature{0, 0, 0};
+        return NullSignature{};
+    };
+}
+
+template <class XTag, UnitSignatureConcept... LSignatures, UnitSignatureConcept... RSignatures>
+consteval auto extractCommonSignature(XTag, TypeList<LSignatures...>, TypeList<RSignatures...>)
+{
+    using LhsSignature = decltype(extractSignatureFromList(XTag{}, TypeList<LSignatures...>{}));
+    using RhsSignature = decltype(extractSignatureFromList(XTag{}, TypeList<RSignatures...>{}));
+
+    if constexpr (!std::same_as<NullSignature, LhsSignature> &&
+                  !std::same_as<NullSignature, RhsSignature>)
+    {
+        constexpr std::int32_t exp_sum{LhsSignature::Exp + RhsSignature::Exp};
+
+        if constexpr (exp_sum == 0)
+        {
+            return NullSignature{};
+        }
+        else
+        {
+            using CommonPeriod = number_helper::ratio_gcd<typename LhsSignature::Period,
+                                                          typename RhsSignature::Period>::type;
+            using CommonSignature = UnitSignature<CommonPeriod, exp_sum, XTag>;
+            return CommonSignature{};
+        }
+    }
+    else if constexpr (!std::same_as<NullSignature, LhsSignature> &&
+                       std::same_as<NullSignature, RhsSignature>)
+    {
+        return LhsSignature{};
+    }
+    else if constexpr (std::same_as<NullSignature, LhsSignature> &&
+                       !std::same_as<NullSignature, RhsSignature>)
+    {
+        return RhsSignature{};
+    }
+    else
+    {
+        return NullSignature{};
     }
 }
 
 template <class XTag, UnitSignatureConcept... LSignatures, UnitSignatureConcept... RSignatures>
-consteval number_helper::RatioConcept auto extractScalingRatioByTag_impl(XTag,
-                                                                         TypeList<LSignatures...>,
-                                                                         TypeList<RSignatures...>)
+consteval number_helper::RatioConcept auto extractScalingRatioContributionByTag(
+    XTag, TypeList<LSignatures...>, TypeList<RSignatures...>)
 {
-    constexpr std::optional<_UnitSignature> lhs_signature{
-        extractSignatureByTag(XTag{}, TypeList<LSignatures...>{})};
-    constexpr std::optional<_UnitSignature> rhs_signature{
-        extractSignatureByTag(XTag{}, TypeList<RSignatures...>{})};
+    using LhsSignature = decltype(extractSignatureFromList(XTag{}, TypeList<LSignatures...>{}));
+    using RhsSignature = decltype(extractSignatureFromList(XTag{}, TypeList<RSignatures...>{}));
 
-    if constexpr (lhs_signature.has_value() && rhs_signature.has_value())
+    if constexpr (!std::same_as<NullSignature, LhsSignature> &&
+                  !std::same_as<NullSignature, RhsSignature>)
     {
-        using LeftRatio = std::ratio<lhs_signature->num, lhs_signature->den>;
-        using RightRatio = std::ratio<rhs_signature->num, rhs_signature->den>;
-        using CommonRatio = number_helper::ratio_gcd<RightRatio, LeftRatio>::type;
+        using CommonPeriod = number_helper::ratio_gcd<typename LhsSignature::Period,
+                                                      typename RhsSignature::Period>::type;
 
-        using ScalingRatioLeft =
-            number_helper::ratio_pow_t<std::ratio_divide<LeftRatio, CommonRatio>,
-                                       lhs_signature->exp>;
-        using ScalingRatioRight =
-            number_helper::ratio_pow_t<std::ratio_divide<RightRatio, CommonRatio>,
-                                       rhs_signature->exp>;
+        using LeftContribution = number_helper::ratio_pow_t<
+            std::ratio_divide<typename LhsSignature::Period, CommonPeriod>, LhsSignature::Exp>;
+        using RightContribution = number_helper::ratio_pow_t<
+            std::ratio_divide<typename RhsSignature::Period, CommonPeriod>, RhsSignature::Exp>;
 
-        using ScalingRatio = std::ratio_multiply<ScalingRatioLeft, ScalingRatioRight>;
-
+        using ScalingRatio = std::ratio_multiply<LeftContribution, RightContribution>;
         return ScalingRatio{};
     }
     else
     {
-        using ScalingRatio = std::ratio<1, 1>;
-        return ScalingRatio{};
+        return std::ratio<1, 1>{};
     }
 }
-
-struct CancelledOutSignature
-{};
 
 template <class _SavedSignaturesList, class _TSignature, class... _USignatures>
 consteval TypeListConcept auto remove_cancelled_out_signatures_impl()
@@ -127,53 +119,28 @@ consteval auto removeCancelledOutSignatures(TypeList<Signatures...> input)
 
 // Returns a TypeList of UnitSignatures (can be empty).
 template <UnitSignatureConcept... _LSignatures, UnitSignatureConcept... _RSignatures>
-consteval TypeListConcept auto computeMultiplicationSignatures_impl(
-    TypeList<_LSignatures...> l_sig_tuple, TypeList<_RSignatures...> r_sig_tuple)
+consteval TypeListConcept auto computeMultiplicationSignatures_impl(TypeList<_LSignatures...>,
+                                                                    TypeList<_RSignatures...>)
 {
     using LTagsList = TypeList<typename _LSignatures::Tag...>;
     using RTagsList = TypeList<typename _RSignatures::Tag...>;
     using TagsList = typelist_helper::typelist_union_t<LTagsList, RTagsList>;
 
     constexpr auto impl = []<std::size_t... Is>(std::index_sequence<Is...>) -> auto {
-        // Return a UnitSignature or CancelledOutSignature.
-        constexpr auto _extract_unit_signature = []<class Tag>(Tag) -> auto {
-            constexpr _UnitSignature common_signature{impl::extractCommonSignature(
-                Tag{}, TypeList<_LSignatures...>{}, TypeList<_RSignatures...>{})};
-
-            if constexpr (common_signature.exp != 0)
-            {
-                static_assert(common_signature.num != 0 && common_signature.den != 0,
-                              "The common signature shall not have zero numerator or "
-                              "denominator.");
-                using RetType =
-                    UnitSignature<std::ratio<common_signature.num, common_signature.den>,
-                                  common_signature.exp, Tag>;
-
-                return RetType{};
-            }
-            else
-            {
-                return CancelledOutSignature{};
-            }
-        };
-
-        // TypeList of UnitSignatures or CancelledOutSignatures.
-        using CombinedSignatures = TypeList<decltype(_extract_unit_signature(
-            typename TagsList::template type_at<Is>{}))...>;
+        // TypeList of UnitSignatures or NullSignatures.
+        using CombinedSignatures = TypeList<decltype(extractCommonSignature(
+            typename TagsList::template type_at<Is>{}, // Tag[Is]
+            TypeList<_LSignatures...>{}, TypeList<_RSignatures...>{}))...>;
 
         using ReturnSignatures = decltype(removeCancelledOutSignatures(CombinedSignatures{}));
-
         return ReturnSignatures{};
     };
 
     return impl(std::make_index_sequence<TagsList::size()>());
 }
 
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _RRep,
-          UnitSignatureConcept... _RSignatures // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _RRep, UnitSignatureConcept... _RSignatures>
 consteval auto determineMultiplyReturnType(CompoundUnit<_LRep, _LSignatures...> lhs,
                                            CompoundUnit<_RRep, _RSignatures...> rhs)
 {
@@ -196,11 +163,8 @@ consteval auto determineMultiplyReturnType(CompoundUnit<_LRep, _LSignatures...> 
     }
 }
 
-template <number_helper::SignedNumberConcept _LRep,
-          UnitSignatureConcept... _LSignatures, // left
-          number_helper::SignedNumberConcept _RRep,
-          UnitSignatureConcept... _RSignatures // right
-          >
+template <number_helper::SignedNumberConcept _LRep, UnitSignatureConcept... _LSignatures,
+          number_helper::SignedNumberConcept _RRep, UnitSignatureConcept... _RSignatures>
 consteval auto determineScalingRatio(CompoundUnit<_LRep, _LSignatures...> lhs,
                                      CompoundUnit<_RRep, _RSignatures...> rhs)
 {
@@ -216,7 +180,7 @@ consteval auto determineScalingRatio(CompoundUnit<_LRep, _LSignatures...> lhs,
     constexpr auto compute_scaling_ratio =
         []<class... Tags>(TypeList<Tags...>) -> number_helper::RatioConcept auto {
         using ScalingRatio =
-            number_helper::ratios_multiply_t<decltype(impl::extractScalingRatioByTag_impl(
+            number_helper::ratios_multiply_t<decltype(extractScalingRatioContributionByTag(
                 Tags{}, LSignaturesList{}, RSignaturesList{}))...>;
         return ScalingRatio{};
     };
@@ -225,9 +189,13 @@ consteval auto determineScalingRatio(CompoundUnit<_LRep, _LSignatures...> lhs,
 }
 
 template <CompoundUnitConcept LeftType, CompoundUnitConcept RightType>
-consteval CompoundUnitConcept auto determineAdditionReturnType(const LeftType& lhs,
+consteval CompoundUnitConcept auto determineCommonCompoundUnit(const LeftType& lhs,
                                                                const RightType& rhs)
 {
+    static_assert(are_compound_units_castable_v<LeftType, RightType>, "The two compound units "
+                                                                      "shall be castable to each "
+                                                                      "other.");
+
     using CommonSignatures = std::conditional_t<
         std::ratio_less_equal_v<typename LeftType::Period, typename RightType::Period>,
         typename LeftType::Signatures, typename RightType::Signatures>;

@@ -23,8 +23,8 @@ The examples of supported numercial comparison:
 * `36.01(Km/h) <=> 10(m/s)` => `std::partial_ordering::greater`
 
 ## Where can I see the examples?
-* The example compound units are defined in [`src/tests/compound_unit_examples.h`](https://github.com/realypz/ypz.compound_strong_type/blob/master/src/tests/compound_unit_examples.h).
-* The example calculations are in [`src/tests/how_to_use.cpp`](https://github.com/realypz/ypz.compound_strong_type/blob/master/src/tests/how_to_use.cpp).
+* The example compound units are defined in [`src/tests/compound_unit_examples.h`](./src/tests/compound_unit_examples.h).
+* The example calculations are in [`src/tests/how_to_use.cpp`](./src/tests/how_to_use.cpp).
 
 ## Preconditions to build and run the tests
 1. Install Bazel. The recommended way to install bazel is via [Bazelisk](https://github.com/bazelbuild/bazelisk).

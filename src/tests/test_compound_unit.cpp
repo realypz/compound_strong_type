@@ -58,21 +58,6 @@ TEST(comparison_operator, _)
     EXPECT_EQ((KmPerHour_double{35.999} <=> MeterPerSecond{10}), std::partial_ordering::less);
 }
 
-TEST(impl_details, extract_common_signature)
-{
-    using LSignaturesTuple = KmPerHour::Signatures;
-    using RSignaturesTuple = Second::Signatures;
-    constexpr auto length_signature =
-        impl::extractCommonSignature(LengthTag{}, LSignaturesTuple{}, RSignaturesTuple{});
-    EXPECT_EQ(length_signature.exp, 1);
-    EXPECT_EQ(length_signature.num, 1000);
-    EXPECT_EQ(length_signature.den, 1);
-
-    constexpr auto time_signature =
-        impl::extractCommonSignature(TimeTag{}, LSignaturesTuple{}, RSignaturesTuple{});
-    EXPECT_EQ(time_signature.exp, 0);
-}
-
 TEST(compound_unit_cast, _)
 {
     {
