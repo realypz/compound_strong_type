@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import glob
 import os
-import pathspec  # TODO: No module named 'pathspec'
+import pathspec
 import re
 
 
@@ -16,7 +16,8 @@ def _generate_macro(file_path: str) -> str:
         The generated macro.
     """
     assert file_path.endswith(".h") or file_path.endswith(".hpp")
-    return re.sub("[/\.]", "_", file_path.upper()) + "_"
+    macro = re.sub("[/\.]", "_", file_path.upper()) + "_"
+    return macro
 
 
 def _read_lines(file_path: str) -> str:
@@ -38,8 +39,7 @@ def _generate_or_fix_header_guard(lines, macro: str):
     DEFINE = f"#define {macro}\n"
     ENDIF = f"#endif // {macro}\n"
 
-    # "no guard" means no header pattern is found at all.
-
+    # None means the line number is not found.
     ifndef_line_nr = None
     define_line_nr = None
     endif_line_nr = None
@@ -49,21 +49,45 @@ def _generate_or_fix_header_guard(lines, macro: str):
     endif_ok = False
 
     for line_number, line_content in enumerate(lines, 0):
-        if line_content.startswith("#ifndef"):
+        if line_content == "":
+            continue
+
+        if ifndef_line_nr == None and line_content.startswith("#ifndef"):
             ifndef_line_nr = line_number
             if line_content == IFNDEF:
                 ifndef_ok = True
+            continue
 
-            # When the ifndef_line_nr is valid, check "#define ".
-            if lines[ifndef_line_nr + 1].startswith("#define"):
-                define_line_nr = ifndef_line_nr + 1
-                if lines[ifndef_line_nr + 1] == DEFINE:
+        if ifndef_ok == True and line_content == IFNDEF:
+            lines[line_number] = ""
+            continue
+
+        if define_line_nr == None and line_content.startswith("#define"):
+            define_line_nr = line_number
+            if ifndef_line_nr != None:
+                if (define_line_nr - ifndef_line_nr) == 1 and line_content == DEFINE:
                     define_ok = True
+                elif (define_line_nr - ifndef_line_nr) > 1 and line_content == DEFINE:
+                    define_ok = False
+                    lines[define_line_nr] = ""
 
-        if line_content.startswith("#endif"):
+            continue
+
+        if define_line_nr != None and line_content == DEFINE:
+            lines[line_number] = ""
+            continue
+
+    for line_number, line_content in reversed(list(enumerate(lines))):
+        if line_content == "":
+            continue
+        if endif_line_nr == None and line_content.startswith("#endif"):
             endif_line_nr = line_number
             if line_content == ENDIF:
                 endif_ok = True
+        break
+
+    # NOTE: important to have #define immediately after #ifndef.
+    define_line_nr = ifndef_line_nr + 1
 
     if ifndef_line_nr != None and ifndef_ok == False:
         lines[ifndef_line_nr] = IFNDEF
@@ -77,10 +101,19 @@ def _generate_or_fix_header_guard(lines, macro: str):
         lines[endif_line_nr] = ENDIF
         endif_ok = True
 
-    if (ifndef_ok and define_ok and endif_ok) == False:
-        lines.insert(0, f"#ifndef {macro}\n")
-        lines.insert(1, f"#define {macro}\n")
-        lines.append(f"#endif // {macro}\n")
+    if ifndef_ok == False:
+        lines.insert(
+            ifndef_line_nr if ifndef_line_nr != None else 0, f"#ifndef {macro}\n"
+        )
+    if define_ok == False:
+        lines.insert(
+            define_line_nr if define_line_nr != None else 1, f"#define {macro}\n"
+        )
+    if endif_ok == False:
+        lines.insert(
+            endif_line_nr if endif_line_nr != None else len(lines),
+            f"#endif // {macro}\n",
+        )
 
 
 def header_guard(file_path: str) -> None:
