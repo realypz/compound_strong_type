@@ -12,25 +12,12 @@ struct TimeTag
 struct LengthTag
 {};
 
+struct MassTag
+{};
+
 namespace compound_unit
 {
 using RatioOne = std::ratio<1, 1>;
-/// Velocity and acceleration units.
-///@{
-using KmPerHour = CompoundUnit<std::int64_t, UnitSignature<std::kilo, 1, LengthTag>,
-                               UnitSignature<std::ratio<3600, 1>, -1, TimeTag>>;
-
-using KmPerHour_double = CompoundUnit<double, UnitSignature<std::kilo, 1, LengthTag>,
-                                      UnitSignature<std::ratio<3600, 1>, -1, TimeTag>>;
-using MeterPerSecond = CompoundUnit<std::int64_t, UnitSignature<RatioOne, 1, LengthTag>,
-                                    UnitSignature<RatioOne, -1, TimeTag>>;
-
-using MeterPerSecondSquare = CompoundUnit<std::int64_t, UnitSignature<RatioOne, 1, LengthTag>,
-                                          UnitSignature<RatioOne, -2, TimeTag>>;
-
-using MeterPerSecond_double = CompoundUnit<double, UnitSignature<RatioOne, 1, LengthTag>,
-                                           UnitSignature<RatioOne, -1, TimeTag>>;
-///@}
 
 /// Length units.
 ///@{
@@ -54,14 +41,37 @@ using Second = CompoundUnit<std::int64_t, UnitSignature<RatioOne, 1, TimeTag>>;
 using Second_double = CompoundUnit<double, UnitSignature<RatioOne, 1, TimeTag>>;
 ///@}
 
+/// Velocity and acceleration units.
+///@{
+using KmPerHour = DivUnit<Km, Hour>;
+using KmPerHour_double = DivUnit<Km_double, Hour_double>;
+using MeterPerSecond = DivUnit<Meter, Second>;
+using MeterPerSecondSquare = DivUnit<MeterPerSecond, Second>;
+using MeterPerSecond_double = CompoundUnit<double, UnitSignature<RatioOne, 1, LengthTag>,
+                                           UnitSignature<RatioOne, -1, TimeTag>>;
+// or DivUnit<MeterPerSecond_double, Second_double>
+///@}
+
 /// Area units.
 ///@{
-using SquareMeter = CompoundUnit<std::int64_t, UnitSignature<RatioOne, 2, LengthTag>>;
-using SquareMeter_double = CompoundUnit<double, UnitSignature<RatioOne, 2, LengthTag>>;
-using SquareCentiMeter = CompoundUnit<std::int64_t, UnitSignature<std::centi, 2, LengthTag>>;
-using SquareCentiMeter_double = CompoundUnit<double, UnitSignature<std::centi, 2, LengthTag>>;
-using SquareMillimeter = CompoundUnit<std::int64_t, UnitSignature<std::milli, 2, LengthTag>>;
+using SquareMeter = MulUnit<Meter, Meter>;
+using SquareMeter_double = MulUnit<Meter_double, Meter_double>;
+using SquareCentiMeter = MulUnit<CentiMeter, CentiMeter>;
+using SquareCentiMeter_double = MulUnit<CentiMeter_double, CentiMeter_double>;
+using SquareMillimeter = MulUnit<MilliMeter, MilliMeter>;
 ///@}
+
+/// Mass units.
+using Kg = CompoundUnit<std::int64_t, UnitSignature<RatioOne, 1, MassTag>>;
+
+/// Force units.
+// clang-format off
+using Newton = CompoundUnit<std::int64_t,
+                            UnitSignature<RatioOne, 1, MassTag>,
+                            UnitSignature<RatioOne, 1, LengthTag>, 
+                            UnitSignature<RatioOne, -2, TimeTag>>;
+// clang-format on
+using Newton_alias = MulUnit<Kg, MeterPerSecondSquare>; // same as Newton
 
 } // namespace compound_unit
 
