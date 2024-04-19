@@ -6,3 +6,4 @@ bazel-ypz.compound_strong_type
 tmp
 MODULE.bazel.lock
 .DS_Store
+.venv
