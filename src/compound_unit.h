@@ -71,6 +71,14 @@ class CompoundUnit
 template <class T>
 concept CompoundUnitConcept = type_helper::is_specialization_v<T, CompoundUnit>;
 
+/// Type to get the multiplication result of two compound unit types.
+template <CompoundUnitConcept L, CompoundUnitConcept R>
+using MulUnit = decltype(L{} * R{});
+
+/// Type to get the division result of two compound unit types.
+template <CompoundUnitConcept L, CompoundUnitConcept R>
+using DivUnit = decltype(L{} / R{1});
+
 /**
  * Helper boolean to determine whether two compound units are castable or not.
  * @tparam T one compound unit specialization

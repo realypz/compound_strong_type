@@ -97,4 +97,14 @@ TEST(how_to_use, comparison_operators)
     // EXPECT_EQ((Km{10} <=> MeterPerSecond{10}), std::partial_ordering::less); // Does not compile
 }
 
+TEST(how_to_use, compound_unit_cast)
+{
+    constexpr auto ret = static_cast<MeterPerSecond>(KmPerHour{36});
+    EXPECT_EQ(ret.count(), 10);
+}
+
+TEST(how_to_use, TypeCreation)
+{
+    EXPECT_TRUE((are_compound_unit_equal_v<Newton, Newton_alias>));
+}
 } // namespace compound_unit
