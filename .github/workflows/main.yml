@@ -21,6 +21,21 @@ jobs:
                 disk-cache: ${{ github.workflow }}
                 # Share repository cache between workflows.
                 repository-cache: true
+          - uses: tecolicom/actions-use-homebrew-tools@v1
+            with:
+                # homebrew packages
+                tools: 'llvm@18'
+            
+                # Cache strategy
+                #
+                # yes:      activate cache
+                # no:       no cache
+                # workflow: effective within same workflow (mainly for test)
+                #
+                cache: yes
+            
+                # Additional cache key
+                key: ''
           - run: bazelisk build --config=cpp20 //...
           - run: bazelisk test --config=cpp20 //...
 
@@ -36,22 +51,28 @@ jobs:
                 disk-cache: ${{ github.workflow }}
                 # Share repository cache between workflows.
                 repository-cache: true
-          - run: wget https://apt.llvm.org/llvm.sh
-          - run: chmod +x llvm.sh
-          - run: sudo ./llvm.sh 18 all
+          # TODO: Consider how to download the 
+          - run: wget https://apt.llvm.org/llvm.sh -P /tmp
+          - run: chmod +x /tmp/llvm.sh
+          - run: sudo /tmp/llvm.sh 18 all
           - run: bazelisk build --config=cpp20 //...
           - run: bazelisk test --config=cpp20 //...
+          - run: bash toolchains/format/format_all.sh
 
-    format-check:
-        runs-on: ubuntu-22.04
-        steps:
-            - uses: actions/checkout@v2
-            - uses: bazel-contrib/setup-bazel@0.8.1
-              with:
-                  # Avoid downloading Bazel every time.
-                  bazelisk-cache: true
-                  # Store build cache per workflow.
-                  disk-cache: ${{ github.workflow }}
-                  # Share repository cache between workflows.
-                  repository-cache: true
-            - run: bash toolchains/format/format_all.sh
+    # TODO: Consider how to cache the fetched llvm toolchain.
+    # format-check:
+    #     runs-on: ubuntu-22.04
+    #     steps:
+    #         - uses: actions/checkout@v2
+    #         - uses: bazel-contrib/setup-bazel@0.8.1
+    #           with:
+    #               # Avoid downloading Bazel every time.
+    #               bazelisk-cache: true
+    #               # Store build cache per workflow.
+    #               disk-cache: ${{ github.workflow }}
+    #               # Share repository cache between workflows.
+    #               repository-cache: true
+    #         - run: wget https://apt.llvm.org/llvm.sh
+    #         - run: chmod +x llvm.sh
+    #         - run: sudo ./llvm.sh 18 all
+    #         - run: bash toolchains/format/format_all.sh
