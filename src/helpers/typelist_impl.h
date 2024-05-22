@@ -6,7 +6,7 @@
 namespace compound_unit::typelist_helper
 {
 ///@{
-template <TypeListConcept _TypeList, class... Args>
+template <TypeListConcept TTypeList, class... Args>
 struct remove_duplicated_type_impl_impl;
 
 template <class... TArgs, class U, class... UArgs>

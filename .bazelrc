@@ -1,4 +1,14 @@
 # Default config, now it will resolve to gcc
-build:default_cpp20 --cxxopt='-std=c++20' -c dbg
+build:cpp20 --cxxopt='-std=c++20' -c dbg
 
 build:cpp23 --cxxopt='-std=c++2b' -c dbg
+
+build:llvm_toolchain --extra_toolchains=//toolchains:llvm_toolchain
+
+build:verbose_all --cxxopt="--verbose" --sandbox_debug -s --verbose_failures
+build:verbose_bazel --sandbox_debug -s
+build:verbose_cpp --cxxopt="--verbose"
+
+build:clang_tidy --config=llvm_toolchain --config=cpp20 \
+    --aspects @devops.bazel_infrastructure//toolchains/cpp/clang_tidy:clang_tidy.bzl%clang_tidy_aspect \
+    --output_groups=report

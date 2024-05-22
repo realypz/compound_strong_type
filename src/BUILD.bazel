@@ -9,18 +9,6 @@ cc_library(
 )
 
 cc_library(
-    name = "single_unit",
-    srcs = [],
-    hdrs = ["single_unit.h"],
-    visibility = ["//:__subpackages__"],
-    deps = [
-        ":signature",
-        "//src/helpers:number_helper",
-        "//src/helpers:typelist",
-    ],
-)
-
-cc_library(
     name = "compound_unit",
     srcs = [],
     hdrs = [
@@ -33,11 +21,4 @@ cc_library(
         "//src/helpers:number_helper",
         "//src/helpers:typelist",
     ],
-)
-
-cc_library(
-    name = "compound_type_old",
-    srcs = [],
-    hdrs = ["compound_type_old.h"],
-    visibility = ["//:__subpackages__"],
 )
