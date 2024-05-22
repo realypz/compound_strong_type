@@ -70,9 +70,9 @@ consteval std::optional<std::size_t> pos_of_type_impl(const std::size_t idx,
  * std::nullopt. Otherwise, return the position of the first occurance in the
  * list.
  */
-template <TypeListConcept _TList, class T>
+template <TypeListConcept TTypeList, class T>
 constexpr std::optional<std::size_t> pos_of_type_v{
-    _TList::empty() ? std::nullopt : pos_of_type_impl<T>(0U, _TList{})};
+    TTypeList::empty() ? std::nullopt : pos_of_type_impl<T>(0U, TTypeList{})};
 ///@}
 
 ///@{
@@ -80,13 +80,14 @@ template <class... TArgs>
 consteval TypeListConcept auto remove_duplicated_type_impl(TypeList<TArgs...>);
 
 /// Remove duplicated types from the given TypeList.
-template <TypeListConcept _TList>
-using remove_duplicated_type_t = decltype(remove_duplicated_type_impl(_TList{}));
+template <TypeListConcept TTypeList>
+using remove_duplicated_type_t = decltype(remove_duplicated_type_impl(TTypeList{}));
 ///@}
 
 /// Boolean that denotes whether tuple has each element type unique.
-template <TypeListConcept _TList>
-constexpr bool is_each_type_unique{_TList::size() == remove_duplicated_type_t<_TList>::size()};
+template <TypeListConcept TTypeList>
+constexpr bool is_each_type_unique{TTypeList::size() ==
+                                   remove_duplicated_type_t<TTypeList>::size()};
 
 /// Union type of two TypeLists.
 template <TypeListConcept ListA, TypeListConcept ListB>
@@ -103,7 +104,7 @@ constexpr bool are_typelists_interchangeable_v{[]() -> bool {
 /// Make sepcialization of a struct template with TypeList as template
 /// arguments.
 ///@{
-template <template <typename...> class T, TypeListConcept _TList>
+template <template <typename...> class T, TypeListConcept TTypeList>
 struct make_specialization;
 
 template <template <typename...> class T, class... Args>
@@ -112,8 +113,8 @@ struct make_specialization<T, TypeList<Args...>>
     using type = T<Args...>;
 };
 
-template <template <typename...> class T, TypeListConcept _TList>
-using make_specialization_t = make_specialization<T, _TList>::type;
+template <template <typename...> class T, TypeListConcept TTypeList>
+using make_specialization_t = make_specialization<T, TTypeList>::type;
 ///@}
 
 } // namespace typelist_helper

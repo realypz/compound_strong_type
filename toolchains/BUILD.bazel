@@ -1,0 +1,17 @@
+# This BUILD file creates alias for the target in the toolchain libaray.
+# Copy it to your own Bazel projects.
+
+alias(
+    name = "llvm_toolchain",
+    actual = "@devops.bazel_infrastructure//toolchains/cpp/build_tools:llvm_toolchain",
+)
+
+alias(
+    name = "clang_format_fix",
+    actual = "@devops.bazel_infrastructure//toolchains/cpp/format:clang_format_fix",
+)
+
+alias(
+    name = "clang_format_diff",
+    actual = "@devops.bazel_infrastructure//toolchains/cpp/format:clang_format_diff",
+)

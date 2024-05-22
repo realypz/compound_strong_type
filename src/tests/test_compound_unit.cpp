@@ -1,5 +1,5 @@
 /*
-bazelisk run --config=default_cpp20 //src/tests:test_compound_unit
+bazelisk run --config=cpp20 //src/tests:test_compound_unit
 */
 #include <gtest/gtest.h>
 

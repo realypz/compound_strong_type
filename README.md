@@ -33,10 +33,10 @@ The examples of supported numercial comparison:
 ## Run tests
 ```shell
 # Run all the tests
-bazelisk test --config=default_cpp20 //...
+bazelisk test --config=cpp20 //...
 
 # Run a single test, change the target name by yourself.
-bazelisk run --config=default_cpp20 //src/tests:test_compound_unit
+bazelisk run --config=cpp20 //src/tests:test_compound_unit
 ```
 
 ## How to format
@@ -60,3 +60,18 @@ To do formating separately,
    ```shell
    bash toolchains/format/header_guard.sh
    ```
+
+
+## (Beta) Commands From External Bazel Toolchain repo
+The [self-made bazel toolchain repo](https://github.com/realypz/devops.bazel_infrastructure.git) has been imported.
+The following commands are provided.
+```shell
+# Use llvm toolchain to build
+bazelisk build --config=llvm_toolchain //...
+
+# Clang-format fix
+bazelisk run //toolchains:clang_format_fix
+
+# Clang-tidy
+bazelisk build --config=clang_tidy //...
+```
