@@ -36,6 +36,9 @@ jobs:
                 disk-cache: ${{ github.workflow }}
                 # Share repository cache between workflows.
                 repository-cache: true
+          - run: wget https://apt.llvm.org/llvm.sh
+          - run: chmod +x llvm.sh
+          - run: sudo ./llvm.sh 18 all
           - run: bazelisk build --config=cpp20 //...
           - run: bazelisk test --config=cpp20 //...
 
