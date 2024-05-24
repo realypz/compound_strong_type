@@ -1,5 +1,5 @@
-#ifndef SRC_HELPERS_TYPELIST_H_
-#define SRC_HELPERS_TYPELIST_H_
+#ifndef _SRC_HELPERS_TYPELIST_H_
+#define _SRC_HELPERS_TYPELIST_H_
 
 #include "type.h"
 
@@ -122,4 +122,4 @@ using make_specialization_t = make_specialization<T, TTypeList>::type;
 
 #include "typelist_impl.h"
 
-#endif // SRC_HELPERS_TYPELIST_H_
+#endif // _SRC_HELPERS_TYPELIST_H_

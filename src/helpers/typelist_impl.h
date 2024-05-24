@@ -1,5 +1,5 @@
-#ifndef SRC_HELPERS_TYPELIST_IMPL_H_
-#define SRC_HELPERS_TYPELIST_IMPL_H_
+#ifndef _SRC_HELPERS_TYPELIST_IMPL_H_
+#define _SRC_HELPERS_TYPELIST_IMPL_H_
 
 #include "typelist.h"
 
@@ -52,4 +52,4 @@ consteval std::optional<std::size_t> pos_of_type_impl(const std::size_t idx,
 }
 
 } // namespace compound_unit::typelist_helper
-#endif // SRC_HELPERS_TYPELIST_IMPL_H_
+#endif // _SRC_HELPERS_TYPELIST_IMPL_H_

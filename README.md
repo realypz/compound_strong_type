@@ -48,17 +48,17 @@ bash toolchains/format/format_all.sh
 To do formating separately,
 1. Clang format
    ```shell
-   bazelisk run //toolchains/format:clang_format_fix
+   bazelisk run //toolchains/external:clang_format_fix
    ```
 
 2. Bazel-buildifier
    ```shell
-   bazelisk run //toolchains/format:bazel_buildifier_fix
+   bazelisk run //toolchains/external:bazel_buildifier_fix
    ```
 
 3. Header guard
    ```shell
-   bash toolchains/format/header_guard.sh
+   bazelisk run //toolchains/external:header_guard -- --workspace-root=$(pwd)
    ```
 
 

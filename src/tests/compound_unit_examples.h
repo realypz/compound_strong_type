@@ -1,5 +1,5 @@
-#ifndef SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
-#define SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
+#ifndef _SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
+#define _SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
 
 #include "src/compound_unit.h"
 #include "src/signature.h"
@@ -75,4 +75,4 @@ using Newton_alias = MulUnit<Kg, MeterPerSecondSquare>; // same as Newton
 
 } // namespace compound_unit
 
-#endif // SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
+#endif // _SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_

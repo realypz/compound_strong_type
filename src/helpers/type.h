@@ -1,5 +1,5 @@
-#ifndef SRC_HELPERS_TYPE_H_
-#define SRC_HELPERS_TYPE_H_
+#ifndef _SRC_HELPERS_TYPE_H_
+#define _SRC_HELPERS_TYPE_H_
 
 #include <cstdint>
 #include <optional>
@@ -23,4 +23,4 @@ constexpr bool is_specialization_v{is_specialization<T, Ref>::value};
 ///@}
 } // namespace compound_unit::type_helper
 
-#endif // SRC_HELPERS_TYPE_H_
+#endif // _SRC_HELPERS_TYPE_H_

@@ -1,5 +1,5 @@
-#ifndef SRC_COMPOUND_UNIT_H_
-#define SRC_COMPOUND_UNIT_H_
+#ifndef _SRC_COMPOUND_UNIT_H_
+#define _SRC_COMPOUND_UNIT_H_
 
 #include <compare>
 #include <cstdint>
@@ -310,4 +310,4 @@ constexpr std::partial_ordering operator<=>(const LeftType& lhs, const RightType
 
 #include "src/compound_unit_impl.h"
 
-#endif // SRC_COMPOUND_UNIT_H_
+#endif // _SRC_COMPOUND_UNIT_H_

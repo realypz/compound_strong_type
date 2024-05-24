@@ -15,3 +15,18 @@ alias(
     name = "clang_format_diff",
     actual = "@devops.bazel_infrastructure//toolchains/cpp/format:clang_format_diff",
 )
+
+alias(
+    name = "header_guard",
+    actual = "@devops.bazel_infrastructure//toolchains/cpp/header_guard:header_guard",
+)
+
+alias(
+    name = "bazel_buildifier_fix",
+    actual = "@devops.bazel_infrastructure//toolchains/bazel_buildifier:bazel_buildifier_fix",
+)
+
+alias(
+    name = "bazel_buildifier_check",
+    actual = "@devops.bazel_infrastructure//toolchains/bazel_buildifier:bazel_buildifier_check",
+)

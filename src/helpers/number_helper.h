@@ -1,5 +1,5 @@
-#ifndef SRC_HELPERS_NUMBER_HELPER_H_
-#define SRC_HELPERS_NUMBER_HELPER_H_
+#ifndef _SRC_HELPERS_NUMBER_HELPER_H_
+#define _SRC_HELPERS_NUMBER_HELPER_H_
 
 #include <numeric>
 #include <ratio>
@@ -90,4 +90,4 @@ using ratios_multiply_t = ratios_multiply<R...>::type;
 
 } // namespace compound_unit::number_helper
 
-#endif // SRC_HELPERS_NUMBER_HELPER_H_
+#endif // _SRC_HELPERS_NUMBER_HELPER_H_

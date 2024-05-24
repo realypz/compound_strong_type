@@ -1,5 +1,5 @@
-#ifndef SRC_SIGNATURE_H_
-#define SRC_SIGNATURE_H_
+#ifndef _SRC_SIGNATURE_H_
+#define _SRC_SIGNATURE_H_
 
 #include "helpers/number_helper.h"
 
@@ -45,4 +45,4 @@ template <UnitSignatureConcept T>
 using inverse_signature_t = UnitSignature<typename T::Period, -T::Exp, typename T::Tag>;
 
 } // namespace compound_unit
-#endif // SRC_SIGNATURE_H_
+#endif // _SRC_SIGNATURE_H_
