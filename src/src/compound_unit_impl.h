@@ -1,5 +1,5 @@
-#ifndef SRC_SRC_COMPOUND_UNIT_IMPL_H_
-#define SRC_SRC_COMPOUND_UNIT_IMPL_H_
+#ifndef _SRC_SRC_COMPOUND_UNIT_IMPL_H_
+#define _SRC_SRC_COMPOUND_UNIT_IMPL_H_
 
 #include "src/compound_unit.h"
 #include "src/helpers/typelist.h"
@@ -208,4 +208,4 @@ consteval CompoundUnitConcept auto determineCommonCompoundUnit(const LeftType& l
 }
 
 } // namespace compound_unit::impl
-#endif // SRC_SRC_COMPOUND_UNIT_IMPL_H_
+#endif // _SRC_SRC_COMPOUND_UNIT_IMPL_H_
