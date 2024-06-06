@@ -20,7 +20,7 @@ bazel_dep(name = "rules_rust", version = "0.38.0")
 bazel_dep(name = "devops.bazel_infrastructure", version = "0.0.0")
 git_override(
     module_name = "devops.bazel_infrastructure",
-    commit = "783e56e308cd353f8fd6948aa7f85ad905be1c62",
+    commit = "c40fd541c82b338dedb8f26b215917c7629ce75b",
     remote = "https://github.com/realypz/devops.bazel_infrastructure.git",
 )
 

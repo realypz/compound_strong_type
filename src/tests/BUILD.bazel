@@ -5,8 +5,8 @@ cc_test(
         "test_typelist.cpp",
     ],
     deps = [
-        "//src/helpers:number_helper",
-        "//src/helpers:typelist",
+        "//src/helpers:number",
+        "//src/helpers:type",
         "@googletest//:gtest_main",
     ],
 )

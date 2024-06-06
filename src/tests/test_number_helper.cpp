@@ -3,7 +3,7 @@ bazelisk run --config=cpp20 //src/tests:test_helpers
 */
 #include <gtest/gtest.h>
 
-#include "src/helpers/number_helper.h"
+#include "src/helpers/number.h"
 #include <cstdint>
 #include <ratio>
 

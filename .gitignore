@@ -7,3 +7,5 @@ tmp
 MODULE.bazel.lock
 .DS_Store
 .venv
+
+doxygen

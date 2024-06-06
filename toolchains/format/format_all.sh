@@ -2,20 +2,12 @@
 ## NOTE: The order matters, since clang format might change linespaces after header guard has run.
 set -e
 
-bash toolchains/python/venv/create_venv.sh
-
-source .venv/bin/activate
-black ./
-deactivate
-
 bazelisk run //toolchains/external:header_guard -- --workspace-root=$(pwd)
 
 bazelisk run //toolchains/external:clang_format_fix
 
 # Bazel files
 bazelisk run //toolchains/external:bazel_buildifier_fix
-
-bazelisk run @rules_rust//:rustfmt
 
 git_diff=$(echo $(git diff))
 

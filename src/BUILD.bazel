@@ -4,7 +4,7 @@ cc_library(
     hdrs = ["signature.h"],
     visibility = ["//:__subpackages__"],
     deps = [
-        "//src/helpers:number_helper",
+        "//src/helpers:number",
     ],
 )
 
@@ -13,12 +13,11 @@ cc_library(
     srcs = [],
     hdrs = [
         "compound_unit.h",
-        "src/compound_unit_impl.h",
     ],
-    visibility = ["//:__subpackages__"],
+    visibility = ["//visibility:public"],
     deps = [
         ":signature",
-        "//src/helpers:number_helper",
-        "//src/helpers:typelist",
+        "//src/helpers:number",
+        "//src/helpers:type",
     ],
 )
