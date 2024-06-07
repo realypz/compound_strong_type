@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "compound_unit_examples.h"
-#include "src/compound_unit.h"
-#include "src/signature.h"
+#include "compound_unit_def.h"
+#include "ypz/strong_type/compound_unit.h"
+#include "ypz/strong_type/signature.h"
 
-namespace compound_unit
+namespace cpu
 {
 
 TEST(how_to_use, operator_plus_minus_multiply_divide)
@@ -20,7 +20,7 @@ TEST(how_to_use, operator_plus_minus_multiply_divide)
         using RetType = std::remove_cv_t<decltype(ret)>;
 
         EXPECT_DOUBLE_EQ(ret.count(), 10 * 60.0 + 0.5 * 1 * 60 * 60);
-        EXPECT_TRUE((are_compound_unit_equal_v<RetType, Meter_double>));
+        EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<RetType, Meter_double>));
     }
 
     { // An incorrect example of compound expression.
@@ -34,7 +34,7 @@ TEST(how_to_use, operator_plus_minus_multiply_divide)
         using RetType = std::remove_cv_t<decltype(ret)>;
 
         EXPECT_EQ(ret.count(), 10 * 60 + 0);
-        EXPECT_TRUE((are_compound_unit_equal_v<RetType, Meter>));
+        EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<RetType, Meter>));
     }
 
     { // A correct example of compound expression.
@@ -62,7 +62,8 @@ TEST(how_to_use, operator_plus_minus_multiply_divide)
         using RetType = std::remove_cv_t<decltype(ret)>;
 
         EXPECT_DOUBLE_EQ(ret.count(), 8 * 8 * 10000.0 + 85 * 1.9);
-        EXPECT_TRUE((are_compound_unit_equal_v<RetType, SquareCentiMeter_double>));
+        EXPECT_TRUE(
+            (compound_unit_helper::are_compound_unit_equal_v<RetType, SquareCentiMeter_double>));
     }
 
     {
@@ -97,7 +98,7 @@ TEST(how_to_use, comparison_operators)
     // EXPECT_EQ((Km{10} <=> MeterPerSecond{10}), std::partial_ordering::less); // Does not compile
 }
 
-TEST(how_to_use, compound_unit_cast)
+TEST(how_to_use, cast)
 {
     constexpr auto ret = static_cast<MeterPerSecond>(KmPerHour{36});
     EXPECT_EQ(ret.count(), 10);
@@ -105,6 +106,6 @@ TEST(how_to_use, compound_unit_cast)
 
 TEST(how_to_use, TypeCreation)
 {
-    EXPECT_TRUE((are_compound_unit_equal_v<Newton, Newton_alias>));
+    EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<Newton, Newton_alias>));
 }
-} // namespace compound_unit
+} // namespace cpu

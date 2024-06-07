@@ -1,4 +1,5 @@
 # Compound Unit
+## Introduction
 This C++ library implements **strong type** for **compound units**, with its numerical calculation (operator `+` `-` `*` `/`) and numerical comparison operator (`<=>`).
 
 The examples of compound units: `Km/h`, `m/s^2`, `cm^2`.
@@ -22,56 +23,39 @@ The examples of supported numercial comparison:
 * `36(Km/h) <=> 10(m/s)` => `std::partial_ordering::equivalent`
 * `36.01(Km/h) <=> 10(m/s)` => `std::partial_ordering::greater`
 
+## What header files shall I use?
+The public headers are
+* [`ypz/strong_type/compound_unit.h`](src/include/ypz/strong_type/compound_unit.h), which provies the strong type class template `CompoundUnit`and operator `+-*/` overloading.
+* [`ypz/strong_type/signature.h`](src/include/ypz/strong_type/signature.h), which provides class template `UnitSignature`.
+
+The public APIs are under namespace `cpu`, the helper namespaces under `cpu` are not intended for public usage.
+
 ## Where can I see the examples?
-* The example compound units are defined in [`src/tests/compound_unit_examples.h`](./src/tests/compound_unit_examples.h).
-* The example calculations are in [`src/tests/how_to_use.cpp`](./src/tests/how_to_use.cpp).
+* The example compound units are defined in [`src/tests/compound_unit_def.h`](./src/tests/compound_unit_def.h).
+* The example calculations of compound units are in [`src/tests/how_to_use.cpp`](./src/tests/how_to_use.cpp).
 
-## Preconditions to build and run the tests
+## Steps to use the strong type library in your Bazel project
 1. Install Bazel. The recommended way to install bazel is via [Bazelisk](https://github.com/bazelbuild/bazelisk).
-2. The compiler shall support C++20 or higher C++ standard.
+2. In your own bazel project, copy paste the following to `MODULE.bazel` of your project and replace the commit to the latest commit hash from main.
+   ```
+   bazel_dep(name = "ypz.compound_strong_type", version = "0.0.0")
+   git_override(
+      module_name = "ypz.compound_strong_type",
+      commit = "...",
+      remote = "https://github.com/realypz/ypz.compound_strong_type.git",
+   )
+   ```
+3. Add `"@ypz.compound_strong_type//:lib"` to the `dep` list of `cc_library` or `cc_binary` rules.
+4. `#include <ypz/strong_type/compound_unit.h>` and `#include <ypz/strong_type/signature.h>`
+5. Build with **`--cxxopt="std=c++20"`** or higher C++ standard.
 
-## Run tests
+## Run all tests
 ```shell
 # Run all the tests
 bazelisk test --config=cpp20 //...
-
-# Run a single test, change the target name by yourself.
-bazelisk run --config=cpp20 //src/tests:test_compound_unit
 ```
 
-## How to format
-To do all the formatting, run
+## How to format everything in this repo?
 ```shell
 bash toolchains/format/format_all.sh
-```
-
-To do formating separately,
-1. Clang format
-   ```shell
-   bazelisk run //toolchains/external:clang_format_fix
-   ```
-
-2. Bazel-buildifier
-   ```shell
-   bazelisk run //toolchains/external:bazel_buildifier_fix
-   ```
-
-3. Header guard
-   ```shell
-   bazelisk run //toolchains/external:header_guard -- --workspace-root=$(pwd)
-   ```
-
-
-## (Beta) Commands From External Bazel Toolchain repo
-The [self-made bazel toolchain repo](https://github.com/realypz/devops.bazel_infrastructure.git) has been imported.
-The following commands are provided.
-```shell
-# Use llvm toolchain to build
-bazelisk build --config=llvm_toolchain //...
-
-# Clang-format fix
-bazelisk run //toolchains:clang_format_fix
-
-# Clang-tidy
-bazelisk build --config=clang_tidy //...
 ```

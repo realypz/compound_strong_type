@@ -13,56 +13,14 @@ module(
 )
 ##### end #####
 
-bazel_dep(name = "protobuf", version = "23.1")
-bazel_dep(name = "rules_rust", version = "0.38.0")
-
-##### My own Bazel infrastructure #####
+##### Bazel infrastructure #####
 bazel_dep(name = "devops.bazel_infrastructure", version = "0.0.0")
 git_override(
     module_name = "devops.bazel_infrastructure",
-    commit = "783e56e308cd353f8fd6948aa7f85ad905be1c62",
+    commit = "c40fd541c82b338dedb8f26b215917c7629ce75b",
     remote = "https://github.com/realypz/devops.bazel_infrastructure.git",
 )
 
-##### Rust #####
-rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(
-    edition = "2021",
-    versions = ["1.73.0"],
-)
-use_repo(rust, "rust_toolchains")
-
-register_toolchains("@rust_toolchains//:all")
-##### end #####
-
-##### Bazel buildifier #####
-bazel_buildifier = use_extension("//toolchains/format:buildifier_module.bzl", "bazel_buildifier")
-
-BUILDIFIER_REPO_NAME = "buildifier_http_file"
-
-use_repo(bazel_buildifier, BUILDIFIER_REPO_NAME)
-##### end #####
-
 #### Google Test #####
 bazel_dep(name = "googletest", version = "1.14.0")
-##### end #####
-
-##### LLVM Toolchain #####
-bazel_dep(name = "toolchains_llvm", version = "0.10.3")
-git_override(
-    module_name = "toolchains_llvm",
-    commit = "329910897f3114f3f5d24407d9abf49b244056d2",
-    remote = "https://github.com/bazel-contrib/toolchains_llvm",
-)
-
-# Configure and register the toolchain.
-llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
-llvm.toolchain(
-    llvm_version = "17.0.6",
-)
-use_repo(llvm, "llvm_toolchain")
-use_repo(llvm, "llvm_toolchain_llvm")  # if you depend on specific tools in scripts
-
-# BUG 2024-02-07: This toolchain will override the default C++ toolchain.
-# register_toolchains("@llvm_toolchain//:all")
 ##### end #####

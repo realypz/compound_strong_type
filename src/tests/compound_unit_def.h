@@ -1,8 +1,8 @@
-#ifndef _SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
-#define _SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
+#ifndef SRC_TESTS_COMPOUND_UNIT_DEF_H_
+#define SRC_TESTS_COMPOUND_UNIT_DEF_H_
 
-#include "src/compound_unit.h"
-#include "src/signature.h"
+#include "ypz/strong_type/compound_unit.h"
+#include "ypz/strong_type/signature.h"
 
 #include <ratio>
 
@@ -15,7 +15,7 @@ struct LengthTag
 struct MassTag
 {};
 
-namespace compound_unit
+namespace cpu
 {
 using RatioOne = std::ratio<1, 1>;
 
@@ -43,22 +43,22 @@ using Second_double = CompoundUnit<double, UnitSignature<RatioOne, 1, TimeTag>>;
 
 /// Velocity and acceleration units.
 ///@{
-using KmPerHour = DivUnit<Km, Hour>;
-using KmPerHour_double = DivUnit<Km_double, Hour_double>;
-using MeterPerSecond = DivUnit<Meter, Second>;
-using MeterPerSecondSquare = DivUnit<MeterPerSecond, Second>;
+using KmPerHour = DivideUnit<Km, Hour>;
+using KmPerHour_double = DivideUnit<Km_double, Hour_double>;
+using MeterPerSecond = DivideUnit<Meter, Second>;
+using MeterPerSecondSquare = DivideUnit<MeterPerSecond, Second>;
 using MeterPerSecond_double = CompoundUnit<double, UnitSignature<RatioOne, 1, LengthTag>,
                                            UnitSignature<RatioOne, -1, TimeTag>>;
-// or DivUnit<MeterPerSecond_double, Second_double>
+// or DivideUnit<MeterPerSecond_double, Second_double>
 ///@}
 
 /// Area units.
 ///@{
-using SquareMeter = MulUnit<Meter, Meter>;
-using SquareMeter_double = MulUnit<Meter_double, Meter_double>;
-using SquareCentiMeter = MulUnit<CentiMeter, CentiMeter>;
-using SquareCentiMeter_double = MulUnit<CentiMeter_double, CentiMeter_double>;
-using SquareMillimeter = MulUnit<MilliMeter, MilliMeter>;
+using SquareMeter = MultiplyUnit<Meter, Meter>;
+using SquareMeter_double = MultiplyUnit<Meter_double, Meter_double>;
+using SquareCentiMeter = MultiplyUnit<CentiMeter, CentiMeter>;
+using SquareCentiMeter_double = MultiplyUnit<CentiMeter_double, CentiMeter_double>;
+using SquareMillimeter = MultiplyUnit<MilliMeter, MilliMeter>;
 ///@}
 
 /// Mass units.
@@ -71,8 +71,8 @@ using Newton = CompoundUnit<std::int64_t,
                             UnitSignature<RatioOne, 1, LengthTag>, 
                             UnitSignature<RatioOne, -2, TimeTag>>;
 // clang-format on
-using Newton_alias = MulUnit<Kg, MeterPerSecondSquare>; // same as Newton
+using Newton_alias = MultiplyUnit<Kg, MeterPerSecondSquare>; // same as Newton
 
-} // namespace compound_unit
+} // namespace cpu
 
-#endif // _SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
+#endif // SRC_TESTS_COMPOUND_UNIT_DEF_H_

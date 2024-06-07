@@ -5,21 +5,20 @@ cc_test(
         "test_typelist.cpp",
     ],
     deps = [
-        "//src/helpers:number_helper",
-        "//src/helpers:typelist",
+        "//src:helpers",
         "@googletest//:gtest_main",
     ],
 )
 
 cc_test(
-    name = "test_compound_unit",
+    name = "test_strong_type",
     srcs = [
-        "compound_unit_examples.h",
+        "compound_unit_def.h",
         "how_to_use.cpp",
         "test_compound_unit.cpp",
     ],
     deps = [
-        "//src:compound_unit",
+        "//src:strong_type",
         "@googletest//:gtest_main",
     ],
 )

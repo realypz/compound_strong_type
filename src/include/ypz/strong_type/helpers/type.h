@@ -1,28 +1,36 @@
-#ifndef _SRC_HELPERS_TYPELIST_H_
-#define _SRC_HELPERS_TYPELIST_H_
-
-#include "type.h"
+#ifndef SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPE_H_
+#define SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPE_H_
 
 #include <cstdint>
 #include <optional>
 
-namespace compound_unit
+namespace cpu
 {
+namespace type_helper
+{
+/// Determine whether a class T is a specialization of a class template Ref.
+///  Works only with "type" arguments, not for "non-type" arguments.
+///@{
+template <typename T, template <typename...> class Ref>
+struct is_specialization : std::false_type
+{};
+
+template <template <typename...> class Ref, typename... Args>
+struct is_specialization<Ref<Args...>, Ref> : std::true_type
+{};
+
+template <typename T, template <typename...> class Ref>
+constexpr bool is_specialization_v{is_specialization<T, Ref>::value};
+
 /// Class template for storing a list of types.
 template <class... TArgs>
 struct TypeList
 {
     /// Get the size of the type list.
-    static constexpr std::size_t size()
-    {
-        return sizeof...(TArgs);
-    };
+    static constexpr std::size_t size() { return sizeof...(TArgs); };
 
     /// Check whether the type list is empty.
-    static constexpr bool empty()
-    {
-        return size() == 0;
-    }
+    static constexpr bool empty() { return size() == 0; }
 
     /// Get the type at the given index.
     template <std::size_t idx> // NOTE: wait pack indexing in C++26
@@ -44,9 +52,6 @@ struct TypeList
 /// Concept for TypeList.
 template <typename T>
 concept TypeListConcept = type_helper::is_specialization_v<T, TypeList>;
-
-namespace typelist_helper
-{
 
 // NOTE: gcc does not support wrapping this function as a lambda.
 template <class... AArgs, class... BArgs>
@@ -117,9 +122,9 @@ template <template <typename...> class T, TypeListConcept TTypeList>
 using make_specialization_t = make_specialization<T, TTypeList>::type;
 ///@}
 
-} // namespace typelist_helper
-} // namespace compound_unit
+} // namespace type_helper
+} // namespace cpu
 
 #include "typelist_impl.h"
 
-#endif // _SRC_HELPERS_TYPELIST_H_
+#endif // SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPE_H_

@@ -1,10 +1,10 @@
-#ifndef _SRC_HELPERS_NUMBER_HELPER_H_
-#define _SRC_HELPERS_NUMBER_HELPER_H_
+#ifndef SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_NUMBER_H_
+#define SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_NUMBER_H_
 
 #include <numeric>
 #include <ratio>
 
-namespace compound_unit::number_helper
+namespace cpu::number_helper
 {
 template <class _Tp>
 struct is_std_ratio : std::false_type
@@ -88,6 +88,6 @@ using ratios_multiply_t = ratios_multiply<R...>::type;
 
 ///@}
 
-} // namespace compound_unit::number_helper
+} // namespace cpu::number_helper
 
-#endif // _SRC_HELPERS_NUMBER_HELPER_H_
+#endif // SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_NUMBER_H_

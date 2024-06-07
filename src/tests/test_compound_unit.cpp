@@ -3,13 +3,13 @@ bazelisk run --config=cpp20 //src/tests:test_compound_unit
 */
 #include <gtest/gtest.h>
 
-#include "compound_unit_examples.h"
-#include "src/compound_unit.h"
-#include "src/signature.h"
+#include "compound_unit_def.h"
+#include "ypz/strong_type/compound_unit.h"
+#include "ypz/strong_type/signature.h"
 #include <cmath>
 #include <ratio>
 
-namespace compound_unit
+namespace cpu
 {
 TEST(compound_unit_member_types, _)
 {
@@ -61,19 +61,19 @@ TEST(comparison_operator, _)
 TEST(compound_unit_cast, _)
 {
     {
-        constexpr auto ret = compound_unit_cast<KmPerHour>(MeterPerSecond{10});
+        constexpr auto ret = static_cast<KmPerHour>(MeterPerSecond{10});
         EXPECT_EQ(ret.count(), 36);
         EXPECT_TRUE((std::same_as<decltype(ret.count()), std::int64_t>));
     }
 
     {
-        constexpr auto ret = compound_unit_cast<MeterPerSecond>(KmPerHour_double{36.0});
+        constexpr auto ret = static_cast<MeterPerSecond>(KmPerHour_double{36.0});
         EXPECT_EQ(ret.count(), 10);
         EXPECT_TRUE((std::same_as<decltype(ret.count()), std::int64_t>));
     }
 
     {
-        constexpr auto ret = compound_unit_cast<MeterPerSecond_double>(KmPerHour{36});
+        constexpr auto ret = static_cast<MeterPerSecond_double>(KmPerHour{36});
         EXPECT_EQ(ret.count(), 10.0);
         EXPECT_TRUE((std::same_as<decltype(ret.count()), double>));
     }
@@ -122,7 +122,7 @@ TEST(operator_multiply_auto_return, _)
 
         using ExpectedRetType =
             CompoundUnit<std::int64_t, UnitSignature<std::ratio<1, 100>, 2, LengthTag>>;
-        EXPECT_TRUE((are_compound_unit_equal_v<ReturnType, ExpectedRetType>));
+        EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<ReturnType, ExpectedRetType>));
     }
 
     // WHEN two compound units which offsets each other multiply
@@ -158,7 +158,7 @@ TEST(operator_multiply_auto_return, _)
         constexpr auto ret = MeterPerSecond{10} * Minute{1};
         using ReturnType = std::remove_cv_t<decltype(ret)>;
 
-        EXPECT_TRUE((are_compound_unit_equal_v<ReturnType, Meter>));
+        EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<ReturnType, Meter>));
         EXPECT_EQ(ret.count(), 10 * 60);
     }
 }
@@ -187,7 +187,7 @@ TEST(operator_divide, _)
 
         using ExpectedRetType = CompoundUnit<double, UnitSignature<std::ratio<1, 1>, 1, LengthTag>,
                                              UnitSignature<std::ratio<1, 1>, -2, TimeTag>>;
-        EXPECT_TRUE((are_compound_unit_equal_v<ReturnType, ExpectedRetType>));
+        EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<ReturnType, ExpectedRetType>));
     }
 
     { // WHEN three operands and two operator/ are used in one expression.
@@ -204,7 +204,7 @@ TEST(operator_divide, _)
 
         using ExpectedRetType = CompoundUnit<double, UnitSignature<std::ratio<1, 1>, 1, LengthTag>,
                                              UnitSignature<std::ratio<1, 1>, -2, TimeTag>>;
-        EXPECT_TRUE((are_compound_unit_equal_v<ReturnType, ExpectedRetType>));
+        EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<ReturnType, ExpectedRetType>));
     }
 
     { // WHEN two operands are used in one expression.
@@ -233,7 +233,8 @@ TEST(operator_divide, _)
 
             constexpr MeterPerSecond_double ret_1{distance / time}; // 250 m/min = 25/6 m/s
             EXPECT_DOUBLE_EQ(ret_1.count(), 25.0 / 6.0);
-            EXPECT_TRUE((are_compound_units_castable_v<MeterPerSecond_double, ReturnType>));
+            EXPECT_TRUE((compound_unit_helper::are_compound_units_castable_v<MeterPerSecond_double,
+                                                                             ReturnType>));
         }
     }
 }
@@ -245,7 +246,7 @@ TEST(operator_plus_minus, _)
         constexpr auto ret = -Km{5} + Km{3};
         using ReturnType = std::remove_cv_t<decltype(ret)>;
         EXPECT_EQ(ret.count(), -2);
-        EXPECT_TRUE((are_compound_unit_equal_v<ReturnType, Km>));
+        EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<ReturnType, Km>));
     }
 
     { // WHEN two operands have different Rep and period.
@@ -253,21 +254,23 @@ TEST(operator_plus_minus, _)
         constexpr auto ret = Km{5} + Meter_double{300.0};
         using ReturnType = std::remove_cv_t<decltype(ret)>;
         EXPECT_DOUBLE_EQ(ret.count(), 5300.0);
-        EXPECT_TRUE((are_compound_unit_equal_v<ReturnType, Meter_double>));
+        EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<ReturnType, Meter_double>));
     }
 
     { // WHEN two operands have different Rep and period.
         constexpr auto ret = KmPerHour{360} - MeterPerSecond_double{120.0};
         using ReturnType = std::remove_cv_t<decltype(ret)>;
         EXPECT_DOUBLE_EQ(ret.count(), 360.0 - 120.0 * 3.6);
-        EXPECT_TRUE((are_compound_unit_equal_v<ReturnType, KmPerHour_double>));
+        EXPECT_TRUE(
+            (compound_unit_helper::are_compound_unit_equal_v<ReturnType, KmPerHour_double>));
     }
 
     {
         constexpr auto ret = SquareMeter{100} - SquareCentiMeter{12} + SquareMillimeter{25};
         using ReturnType = std::remove_cv_t<decltype(ret)>;
         EXPECT_EQ(ret.count(), 100 * 1000 * 1000 - 12 * 10 * 10 + 25);
-        EXPECT_TRUE((are_compound_unit_equal_v<ReturnType, SquareMillimeter>));
+        EXPECT_TRUE(
+            (compound_unit_helper::are_compound_unit_equal_v<ReturnType, SquareMillimeter>));
     }
 }
-} // namespace compound_unit
+} // namespace cpu

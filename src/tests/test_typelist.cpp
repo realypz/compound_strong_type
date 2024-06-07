@@ -4,11 +4,11 @@ bazelisk run --config=cpp20 //src/tests:test_helpers
 
 #include <gtest/gtest.h>
 
-#include "src/helpers/typelist.h"
+#include "ypz/strong_type/helpers/type.h"
 #include <cstdint>
 #include <type_traits>
 
-namespace compound_unit::typelist_helper
+namespace cpu::type_helper
 {
 namespace test
 {
@@ -207,4 +207,4 @@ TEST(typelists_interchangeable, _)
     }
 }
 
-} // namespace compound_unit::typelist_helper
+} // namespace cpu::type_helper

@@ -1,26 +1,26 @@
-#ifndef _SRC_HELPERS_TYPELIST_IMPL_H_
-#define _SRC_HELPERS_TYPELIST_IMPL_H_
+#ifndef SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPELIST_IMPL_H_
+#define SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPELIST_IMPL_H_
 
-#include "typelist.h"
+#include "type.h"
 
-namespace compound_unit::typelist_helper
+namespace cpu::type_helper
 {
 ///@{
 template <TypeListConcept TTypeList, class... Args>
-struct remove_duplicated_type_impl_impl;
+struct remove_duplicated_type_base;
 
 template <class... TArgs, class U, class... UArgs>
-struct remove_duplicated_type_impl_impl<TypeList<TArgs...>, U, UArgs...>
+struct remove_duplicated_type_base<TypeList<TArgs...>, U, UArgs...>
     : std::conditional_t<TypeList<TArgs...>::template has_type<U>,
-                         remove_duplicated_type_impl_impl<TypeList<TArgs...>,
-                                                          UArgs...>, // True
-                         remove_duplicated_type_impl_impl<TypeList<TArgs..., U>,
-                                                          UArgs...> // False
+                         remove_duplicated_type_base<TypeList<TArgs...>,
+                                                     UArgs...>, // True
+                         remove_duplicated_type_base<TypeList<TArgs..., U>,
+                                                     UArgs...> // False
                          >
 {};
 
 template <class... TArgs>
-struct remove_duplicated_type_impl_impl<TypeList<TArgs...>>
+struct remove_duplicated_type_base<TypeList<TArgs...>>
 {
     using type = TypeList<TArgs...>;
 };
@@ -28,7 +28,7 @@ struct remove_duplicated_type_impl_impl<TypeList<TArgs...>>
 template <class... TArgs>
 consteval TypeListConcept auto remove_duplicated_type_impl(TypeList<TArgs...>)
 {
-    return typename remove_duplicated_type_impl_impl<TypeList<>, TArgs...>::type{};
+    return typename remove_duplicated_type_base<TypeList<>, TArgs...>::type{};
 }
 
 ///@}
@@ -51,5 +51,5 @@ consteval std::optional<std::size_t> pos_of_type_impl(const std::size_t idx,
     }
 }
 
-} // namespace compound_unit::typelist_helper
-#endif // _SRC_HELPERS_TYPELIST_IMPL_H_
+} // namespace cpu::type_helper
+#endif // SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPELIST_IMPL_H_
