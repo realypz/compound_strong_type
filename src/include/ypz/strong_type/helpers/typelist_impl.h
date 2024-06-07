@@ -1,9 +1,9 @@
-#ifndef SRC_HELPERS_TYPELIST_IMPL_H_
-#define SRC_HELPERS_TYPELIST_IMPL_H_
+#ifndef SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPELIST_IMPL_H_
+#define SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPELIST_IMPL_H_
 
 #include "type.h"
 
-namespace compound_unit::type_helper
+namespace cpu::type_helper
 {
 ///@{
 template <TypeListConcept TTypeList, class... Args>
@@ -51,5 +51,5 @@ consteval std::optional<std::size_t> pos_of_type_impl(const std::size_t idx,
     }
 }
 
-} // namespace compound_unit::type_helper
-#endif // SRC_HELPERS_TYPELIST_IMPL_H_
+} // namespace cpu::type_helper
+#endif // SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPELIST_IMPL_H_

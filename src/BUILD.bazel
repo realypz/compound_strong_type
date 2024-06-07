@@ -1,23 +1,27 @@
+INCLUDE_DIR = "include/ypz/strong_type/"
+
 cc_library(
-    name = "signature",
+    name = "helpers",
     srcs = [],
-    hdrs = ["signature.h"],
-    visibility = ["//:__subpackages__"],
-    deps = [
-        "//src/helpers:number",
+    hdrs = [
+        INCLUDE_DIR + "helpers/type.h",
+        INCLUDE_DIR + "helpers/typelist_impl.h",
+        INCLUDE_DIR + "helpers/number.h",
     ],
+    strip_include_prefix = "include",
+    visibility = ["//:__subpackages__"],
 )
 
 cc_library(
-    name = "compound_unit",
+    name = "strong_type",
     srcs = [],
     hdrs = [
-        "compound_unit.h",
+        INCLUDE_DIR + "compound_unit.h",
+        INCLUDE_DIR + "signature.h",
     ],
+    strip_include_prefix = "include",
     visibility = ["//visibility:public"],
     deps = [
-        ":signature",
-        "//src/helpers:number",
-        "//src/helpers:type",
+        ":helpers",
     ],
 )

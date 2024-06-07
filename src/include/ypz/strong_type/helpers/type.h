@@ -1,10 +1,10 @@
-#ifndef SRC_HELPERS_TYPE_H_
-#define SRC_HELPERS_TYPE_H_
+#ifndef SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPE_H_
+#define SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPE_H_
 
 #include <cstdint>
 #include <optional>
 
-namespace compound_unit
+namespace cpu
 {
 namespace type_helper
 {
@@ -123,8 +123,8 @@ using make_specialization_t = make_specialization<T, TTypeList>::type;
 ///@}
 
 } // namespace type_helper
-} // namespace compound_unit
+} // namespace cpu
 
 #include "typelist_impl.h"
 
-#endif // SRC_HELPERS_TYPE_H_
+#endif // SRC_INCLUDE_YPZ_STRONG_TYPE_HELPERS_TYPE_H_

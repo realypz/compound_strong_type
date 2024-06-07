@@ -1,10 +1,10 @@
-#ifndef SRC_SIGNATURE_H_
-#define SRC_SIGNATURE_H_
+#ifndef SRC_INCLUDE_YPZ_STRONG_TYPE_SIGNATURE_H_
+#define SRC_INCLUDE_YPZ_STRONG_TYPE_SIGNATURE_H_
 
-#include "helpers/number.h"
-#include "helpers/type.h"
+#include "ypz/strong_type/helpers/number.h"
+#include "ypz/strong_type/helpers/type.h"
 
-namespace compound_unit
+namespace cpu
 {
 /**
  * Unit signature denotes a physical unit's property, numerical scale and its dimension (or
@@ -187,5 +187,5 @@ consteval type_helper::TypeListConcept auto computeMultiplicationSignatures_impl
 }
 } // namespace signature_helper
 
-} // namespace compound_unit
-#endif // SRC_SIGNATURE_H_
+} // namespace cpu
+#endif // SRC_INCLUDE_YPZ_STRONG_TYPE_SIGNATURE_H_

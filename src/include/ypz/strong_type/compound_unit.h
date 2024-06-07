@@ -1,15 +1,15 @@
-#ifndef SRC_COMPOUND_UNIT_H_
-#define SRC_COMPOUND_UNIT_H_
+#ifndef SRC_INCLUDE_YPZ_STRONG_TYPE_COMPOUND_UNIT_H_
+#define SRC_INCLUDE_YPZ_STRONG_TYPE_COMPOUND_UNIT_H_
 
 #include <compare>
 #include <cstdint>
 #include <ratio>
 
-#include "src/helpers/number.h"
-#include "src/helpers/type.h"
-#include "src/signature.h"
+#include "ypz/strong_type/helpers/number.h"
+#include "ypz/strong_type/helpers/type.h"
+#include "ypz/strong_type/signature.h"
 
-namespace compound_unit
+namespace cpu
 {
 /**
  * Compound Unit
@@ -362,6 +362,6 @@ constexpr std::partial_ordering operator<=>(const LeftType& lhs, const RightType
     return static_cast<CommonType>(lhs) <=> static_cast<CommonType>(rhs);
 }
 
-} // namespace compound_unit
+} // namespace cpu
 
-#endif // SRC_COMPOUND_UNIT_H_
+#endif // SRC_INCLUDE_YPZ_STRONG_TYPE_COMPOUND_UNIT_H_

@@ -1,8 +1,8 @@
-#ifndef SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
-#define SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
+#ifndef SRC_TESTS_COMPOUND_UNIT_DEF_H_
+#define SRC_TESTS_COMPOUND_UNIT_DEF_H_
 
-#include "src/compound_unit.h"
-#include "src/signature.h"
+#include "ypz/strong_type/compound_unit.h"
+#include "ypz/strong_type/signature.h"
 
 #include <ratio>
 
@@ -15,7 +15,7 @@ struct LengthTag
 struct MassTag
 {};
 
-namespace compound_unit
+namespace cpu
 {
 using RatioOne = std::ratio<1, 1>;
 
@@ -73,6 +73,6 @@ using Newton = CompoundUnit<std::int64_t,
 // clang-format on
 using Newton_alias = MultiplyUnit<Kg, MeterPerSecondSquare>; // same as Newton
 
-} // namespace compound_unit
+} // namespace cpu
 
-#endif // SRC_TESTS_COMPOUND_UNIT_EXAMPLES_H_
+#endif // SRC_TESTS_COMPOUND_UNIT_DEF_H_

@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
 
-#include "compound_unit_examples.h"
-#include "src/compound_unit.h"
-#include "src/signature.h"
+#include "compound_unit_def.h"
+#include "ypz/strong_type/compound_unit.h"
+#include "ypz/strong_type/signature.h"
 
-namespace compound_unit
+namespace cpu
 {
 
 TEST(how_to_use, operator_plus_minus_multiply_divide)
@@ -108,4 +108,4 @@ TEST(how_to_use, TypeCreation)
 {
     EXPECT_TRUE((compound_unit_helper::are_compound_unit_equal_v<Newton, Newton_alias>));
 }
-} // namespace compound_unit
+} // namespace cpu

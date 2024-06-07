@@ -3,13 +3,13 @@ bazelisk run --config=cpp20 //src/tests:test_compound_unit
 */
 #include <gtest/gtest.h>
 
-#include "compound_unit_examples.h"
-#include "src/compound_unit.h"
-#include "src/signature.h"
+#include "compound_unit_def.h"
+#include "ypz/strong_type/compound_unit.h"
+#include "ypz/strong_type/signature.h"
 #include <cmath>
 #include <ratio>
 
-namespace compound_unit
+namespace cpu
 {
 TEST(compound_unit_member_types, _)
 {
@@ -273,4 +273,4 @@ TEST(operator_plus_minus, _)
             (compound_unit_helper::are_compound_unit_equal_v<ReturnType, SquareMillimeter>));
     }
 }
-} // namespace compound_unit
+} // namespace cpu

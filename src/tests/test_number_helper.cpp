@@ -3,11 +3,11 @@ bazelisk run --config=cpp20 //src/tests:test_helpers
 */
 #include <gtest/gtest.h>
 
-#include "src/helpers/number.h"
+#include "ypz/strong_type/helpers/number.h"
 #include <cstdint>
 #include <ratio>
 
-namespace compound_unit::number_helper
+namespace cpu::number_helper
 {
 TEST(ratio_gcd, _)
 {
@@ -107,4 +107,4 @@ TEST(ratio_pow, case_positive_exp)
         EXPECT_TRUE((std::ratio_equal_v<JointRatio, std::ratio<49, 25>>));
     }
 }
-} // namespace compound_unit::number_helper
+} // namespace cpu::number_helper
